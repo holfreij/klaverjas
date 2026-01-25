@@ -19,42 +19,60 @@ Klaverjas is a Dutch trick-taking card game for 4 players in fixed partnerships.
 
 ### Non-Trump Suits
 
-| Card | Rank (high to low) | Points |
-|------|-------------------|--------|
-| Ace  | 1                 | 11     |
-| 10   | 2                 | 10     |
-| King | 3                 | 4      |
-| Queen| 4                 | 3      |
-| Jack | 5                 | 2      |
-| 9    | 6                 | 0      |
-| 8    | 7                 | 0      |
-| 7    | 8                 | 0      |
+| Card  | Rank (high to low) | Points |
+| ----- | ------------------ | ------ |
+| Ace   | 1                  | 11     |
+| 10    | 2                  | 10     |
+| King  | 3                  | 4      |
+| Queen | 4                  | 3      |
+| Jack  | 5                  | 2      |
+| 9     | 6                  | 0      |
+| 8     | 7                  | 0      |
+| 7     | 8                  | 0      |
 
 ### Trump Suit
 
-| Card | Rank (high to low) | Points |
-|------|-------------------|--------|
-| Jack (Nel) | 1          | 20     |
-| 9 (Nell)   | 2          | 14     |
-| Ace        | 3          | 11     |
-| 10         | 4          | 10     |
-| King       | 5          | 4      |
-| Queen      | 6          | 3      |
-| 8          | 7          | 0      |
-| 7          | 8          | 0      |
+| Card       | Rank (high to low) | Points |
+| ---------- | ------------------ | ------ |
+| Jack (Nel) | 1                  | 20     |
+| 9 (Nell)   | 2                  | 14     |
+| Ace        | 3                  | 11     |
+| 10         | 4                  | 10     |
+| King       | 5                  | 4      |
+| Queen      | 6                  | 3      |
+| 8          | 7                  | 0      |
+| 7          | 8                  | 0      |
 
 **Total points per round**: 162 (152 from cards + 10 for last trick)
 
 ## Game Flow
 
-### Trump Selection Phase
+### Trump Selection
+
+There are two variants for selecting trump. We implement **Troef Maken** first (simpler), with **Troef Draaien** as a future enhancement.
+
+#### Variant 1: Troef Maken (Implement First)
 
 1. Cards are dealt (8 per player)
-2. A trump suit is proposed (can be random or from turned card)
+2. Player left of dealer **must** choose a trump suit
+3. This player's team becomes the "playing team"
+
+#### Variant 2: Troef Draaien (Future Enhancement)
+
+Uses a separate "trump deck" of 20 cards (2-6 of each suit, not used in play).
+
+1. Cards are dealt (8 per player)
+2. Draw one card from trump deck - this suit is proposed as trump
 3. Starting with player left of dealer, each player can:
    - **Play**: Accept the proposed trump (their team becomes the "playing team")
    - **Pass**: Decline, next player decides
-4. If all 4 players pass, the first player must choose any suit as trump
+4. If all 4 players pass:
+   - Draw another card from trump deck (must be different suit; keep drawing until different, reshuffle when depleted)
+   - Repeat step 3
+5. If all 4 players pass again:
+   - Reshuffle all 32 cards, deal new hands
+   - Don't reshuffle trump deck (unless it is depleted), draw new trump card
+   - Repeat until someone plays
 
 ### Playing Phase
 
@@ -93,16 +111,18 @@ When a card is led, you must:
 
 Roem must be **manually claimed** by players. The system validates claims.
 
-| Combination | Points | Description |
-|-------------|--------|-------------|
-| Three in sequence | 20 | Three consecutive cards of same suit (e.g., 7-8-9) |
-| Four in sequence | 50 | Four consecutive cards of same suit |
-| Stuk | 20 | King and Queen of trump suit |
-| Four of a kind | 100 | Four cards of same rank (e.g., four Jacks) |
+| Combination       | Points | Description                                        |
+| ----------------- | ------ | -------------------------------------------------- |
+| Three in sequence | 20     | Three consecutive cards of same suit (e.g., 7-8-9) |
+| Four in sequence  | 50     | Four consecutive cards of same suit                |
+| Stuk              | 20     | King and Queen of trump suit                       |
+| Four of a kind    | 100    | Four cards of same rank (e.g., four Jacks)         |
 
 **Sequence order**: 7-8-9-10-J-Q-K-A
 
-**Roem timing**: Can be claimed when playing a card that completes or contains the combination.
+**Roem ownership**: Roem is awarded to the team that **wins the trick** in which the roem cards are played. If you claim roem but lose the trick, the opponents get your roem points.
+
+**Roem timing**: Can be claimed when playing a card that is part of the combination.
 
 **Stacked roem**: If King-Queen of trump appear in a sequence, both bonuses apply (e.g., Q-K-A of trump = 20 for stuk + 20 for sequence = 40).
 
@@ -110,7 +130,7 @@ Roem must be **manually claimed** by players. The system validates claims.
 
 - **Playing team wins**: Gets their points (cards + roem)
 - **Playing team fails** ("Nat"): Gets 0, opponents get 162 + all roem
-- **Pit**: If one team wins all 8 tricks, +100 bonus points
+- **Pit**: If the **playing team** wins all 8 tricks, they get +100 bonus points. (If the defending team wins all tricks, no pit bonus is awarded - this is just a regular "nat" for the playing team.)
 
 ### Game Length
 
@@ -119,10 +139,11 @@ Roem must be **manually claimed** by players. The system validates claims.
 
 ## Edge Cases
 
-1. **All pass**: First player must choose a trump suit
-2. **Equal sequences**: Higher sequence wins (K-Q-J beats 9-8-7)
-3. **Must under-trump**: If you can't follow and can't beat the existing trump, you must still play a trump if you have one
-4. **Roem validation**: System should verify claimed roem actually exists in the trick
+1. **All pass (Troef Draaien only)**: Draw new trump card, repeat. If all pass again, redeal.
+2. **Must under-trump**: If you can't follow suit and can't beat the existing trump, you must still play a trump if you have one
+3. **Roem validation**: System should verify claimed roem actually exists in the cards played
+4. **Roem in lost trick**: If you claim roem but lose the trick, opponents get those roem points
+5. **Defending team wins all tricks**: This is NOT a pit - playing team just goes "nat" with no pit bonus for defenders
 
 ## Implementation Notes
 

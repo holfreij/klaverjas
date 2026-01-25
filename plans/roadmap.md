@@ -53,7 +53,7 @@ klaverjas/
 
 ## Development Stages
 
-### Stage 1: Foundation ✓ (In Progress)
+### Stage 1: Foundation ✓
 **Goal:** Deployable skeleton with CI/CD
 
 - [x] Initialize SvelteKit project with TypeScript
@@ -70,20 +70,20 @@ klaverjas/
 
 ---
 
-### Stage 2: Core Game Logic
+### Stage 2: Core Game Logic ✓
 **Goal:** Complete, tested Klaverjas rules engine
 
-- [ ] Card and Deck types/utilities
-- [ ] Dealing mechanism (8 cards each)
-- [ ] Trump suit mechanics (Rotterdam rules)
-- [ ] Legal move validation (follow suit, must trump, etc.)
-- [ ] Trick winner determination
-- [ ] Scoring system (card points + final trick bonus)
-- [ ] Roem detection logic (sequences, stuk, four-of-a-kind)
-- [ ] Roem claim validation (player claims, system verifies)
-- [ ] "Nat" logic (playing team fails)
-- [ ] Pit bonus (winning all tricks)
-- [ ] Full game flow (16 rounds)
+- [x] Card and Deck types/utilities
+- [x] Dealing mechanism (8 cards each)
+- [x] Trump suit mechanics (Rotterdam rules)
+- [x] Legal move validation (follow suit, must trump, etc.)
+- [x] Trick winner determination
+- [x] Scoring system (card points + final trick bonus)
+- [x] Roem detection logic (sequences, stuk, four-of-a-kind)
+- [x] Roem claim validation (player claims, system verifies)
+- [x] "Nat" logic (playing team fails)
+- [x] Pit bonus (winning all tricks)
+- [x] Full game flow (16 rounds)
 
 **Approach:** TDD - write tests first, then implementation
 
