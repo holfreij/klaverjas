@@ -3,7 +3,7 @@
  * Klaverjas uses a 32-card deck (7-A in 4 suits).
  */
 
-export const SUITS = ['hearts', 'diamonds', 'clubs', 'spades'] as const;
+export const SUITS = ['Harten', 'Ruiten', 'Klaver', 'Schoppen'] as const;
 export type Suit = (typeof SUITS)[number];
 
 export const RANKS = ['7', '8', '9', '10', 'J', 'Q', 'K', 'A'] as const;
@@ -21,7 +21,7 @@ const NON_TRUMP_RANK_ORDER: readonly Rank[] = ['A', '10', 'K', 'Q', 'J', '9', '8
 
 /**
  * Card rankings for trump suit (index 0 = highest)
- * J (Nel) and 9 (Nell) are highest in trump
+ * J and 9 (Nel) are highest in trump
  */
 const TRUMP_RANK_ORDER: readonly Rank[] = ['J', '9', 'A', '10', 'K', 'Q', '8', '7'];
 
@@ -43,8 +43,8 @@ const NON_TRUMP_POINTS: Record<Rank, number> = {
  * Point values for trump cards
  */
 const TRUMP_POINTS: Record<Rank, number> = {
-	J: 20, // Nel
-	'9': 14, // Nell
+	J: 20,
+	'9': 14, // Nel
 	A: 11,
 	'10': 10,
 	K: 4,
@@ -150,5 +150,5 @@ export function compareCards(a: Card, b: Card, trump: Suit, ledSuit: Suit): numb
  * Returns a human-readable string representation of a card.
  */
 export function cardToString(card: Card): string {
-	return `${card.rank} of ${card.suit}`;
+	return `${card.suit} ${card.rank}`;
 }

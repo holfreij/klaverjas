@@ -61,15 +61,15 @@ describe('game', () => {
 		});
 
 		it('should set trump suit and move to playing phase', () => {
-			const result = chooseTrump(game, 'hearts');
+			const result = chooseTrump(game, 'Harten');
 
-			expect(result.trump).toBe('hearts');
+			expect(result.trump).toBe('Harten');
 			expect(result.phase).toBe('playing');
 			expect(result.playingTeam).toBe('WE'); // Player 1 is WE
 		});
 
 		it('should set current player to left of dealer', () => {
-			const result = chooseTrump(game, 'spades');
+			const result = chooseTrump(game, 'Schoppen');
 
 			expect(result.currentPlayer).toBe(1); // Left of dealer (0)
 		});
@@ -77,17 +77,17 @@ describe('game', () => {
 		it('should throw if not in trump phase', () => {
 			const playingGame = { ...game, phase: 'playing' as GamePhase };
 
-			expect(() => chooseTrump(playingGame, 'hearts')).toThrow();
+			expect(() => chooseTrump(playingGame, 'Harten')).toThrow();
 		});
 
 		it('should record the playing team correctly based on who chose trump', () => {
 			// Player 1 chooses (left of dealer 0)
-			let result = chooseTrump(game, 'hearts');
+			let result = chooseTrump(game, 'Harten');
 			expect(result.playingTeam).toBe('WE');
 
 			// Test with different dealer
 			const game2 = { ...createGame(), dealer: 1, currentPlayer: 2 };
-			result = chooseTrump(game2, 'hearts');
+			result = chooseTrump(game2, 'Harten');
 			expect(result.playingTeam).toBe('NS'); // Player 2 is NS
 		});
 	});
@@ -97,7 +97,7 @@ describe('game', () => {
 
 		beforeEach(() => {
 			game = createGame();
-			game = chooseTrump(game, 'hearts');
+			game = chooseTrump(game, 'Harten');
 		});
 
 		it('should add card to current trick', () => {
@@ -125,7 +125,7 @@ describe('game', () => {
 		});
 
 		it('should throw if card is not in player hand', () => {
-			const fakeCard: Card = { suit: 'diamonds', rank: '7' };
+			const fakeCard: Card = { suit: 'Ruiten', rank: '7' };
 
 			// Make sure the fake card is not in the hand
 			if (!game.hands[game.currentPlayer].some((c) => c.suit === fakeCard.suit && c.rank === fakeCard.rank)) {
@@ -180,7 +180,7 @@ describe('game', () => {
 
 		beforeEach(() => {
 			game = createGame();
-			game = chooseTrump(game, 'hearts');
+			game = chooseTrump(game, 'Harten');
 		});
 
 		it('should record valid roem claim', () => {
@@ -204,9 +204,9 @@ describe('game', () => {
 			const invalidClaim = {
 				type: 'sequence3' as const,
 				cards: [
-					{ suit: 'spades' as Suit, rank: '7' as const },
-					{ suit: 'spades' as Suit, rank: '8' as const },
-					{ suit: 'hearts' as Suit, rank: '10' as const }, // Different suit!
+					{ suit: 'Schoppen' as Suit, rank: '7' as const },
+					{ suit: 'Schoppen' as Suit, rank: '8' as const },
+					{ suit: 'Harten' as Suit, rank: '10' as const }, // Different suit!
 				],
 			};
 
@@ -217,7 +217,7 @@ describe('game', () => {
 	describe('round completion', () => {
 		it('should complete round after 8 tricks', () => {
 			let game = createGame();
-			game = chooseTrump(game, 'hearts');
+			game = chooseTrump(game, 'Harten');
 
 			// Play all 8 tricks (32 cards)
 			for (let trick = 0; trick < 8; trick++) {
@@ -233,7 +233,7 @@ describe('game', () => {
 
 		it('should update scores after round completion', () => {
 			let game = createGame();
-			game = chooseTrump(game, 'hearts');
+			game = chooseTrump(game, 'Harten');
 
 			// Play all 8 tricks
 			for (let trick = 0; trick < 8; trick++) {
@@ -250,7 +250,7 @@ describe('game', () => {
 		it('should rotate dealer after round', () => {
 			let game = createGame();
 			const initialDealer = game.dealer;
-			game = chooseTrump(game, 'hearts');
+			game = chooseTrump(game, 'Harten');
 
 			// Play full round
 			for (let trick = 0; trick < 8; trick++) {
@@ -268,7 +268,7 @@ describe('game', () => {
 			let game = createGame();
 
 			for (let round = 0; round < 16; round++) {
-				game = chooseTrump(game, 'hearts');
+				game = chooseTrump(game, 'Harten');
 
 				for (let trick = 0; trick < 8; trick++) {
 					for (let card = 0; card < 4; card++) {
@@ -285,7 +285,7 @@ describe('game', () => {
 			let game = createGame();
 
 			for (let round = 0; round < 16; round++) {
-				game = chooseTrump(game, 'hearts');
+				game = chooseTrump(game, 'Harten');
 
 				for (let trick = 0; trick < 8; trick++) {
 					for (let card = 0; card < 4; card++) {

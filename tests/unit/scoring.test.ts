@@ -8,15 +8,15 @@ import {
 } from '$lib/game/scoring';
 
 describe('scoring', () => {
-	const trump: Suit = 'hearts';
+	const trump: Suit = 'Harten';
 
 	describe('calculateTrickPoints', () => {
 		it('should sum point values of all cards', () => {
 			const cards: Card[] = [
-				{ suit: 'spades', rank: 'A' }, // 11
-				{ suit: 'spades', rank: '10' }, // 10
-				{ suit: 'spades', rank: 'K' }, // 4
-				{ suit: 'spades', rank: '7' }, // 0
+				{ suit: 'Schoppen', rank: 'A' }, // 11
+				{ suit: 'Schoppen', rank: '10' }, // 10
+				{ suit: 'Schoppen', rank: 'K' }, // 4
+				{ suit: 'Schoppen', rank: '7' }, // 0
 			];
 
 			expect(calculateTrickPoints(cards, trump)).toBe(25);
@@ -24,10 +24,10 @@ describe('scoring', () => {
 
 		it('should use trump values for trump cards', () => {
 			const cards: Card[] = [
-				{ suit: 'hearts', rank: 'J' }, // 20 (trump Nel)
-				{ suit: 'hearts', rank: '9' }, // 14 (trump Nell)
-				{ suit: 'spades', rank: 'A' }, // 11
-				{ suit: 'spades', rank: '7' }, // 0
+				{ suit: 'Harten', rank: 'J' }, // 20 (trump Nel)
+				{ suit: 'Harten', rank: '9' }, // 14 (trump Nell)
+				{ suit: 'Schoppen', rank: 'A' }, // 11
+				{ suit: 'Schoppen', rank: '7' }, // 0
 			];
 
 			expect(calculateTrickPoints(cards, trump)).toBe(45);
@@ -189,9 +189,9 @@ describe('scoring', () => {
 function makeCards(points: number): Card[] {
 	// Just return dummy cards - scoring uses pre-calculated points
 	return [
-		{ suit: 'spades', rank: '7' },
-		{ suit: 'spades', rank: '8' },
-		{ suit: 'spades', rank: '9' },
-		{ suit: 'spades', rank: '10' },
+		{ suit: 'Schoppen', rank: '7' },
+		{ suit: 'Schoppen', rank: '8' },
+		{ suit: 'Schoppen', rank: '9' },
+		{ suit: 'Schoppen', rank: '10' },
 	];
 }

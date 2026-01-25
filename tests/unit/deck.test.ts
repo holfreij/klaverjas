@@ -17,10 +17,10 @@ describe('deck', () => {
 	describe('constants', () => {
 		it('should have 4 suits', () => {
 			expect(SUITS).toHaveLength(4);
-			expect(SUITS).toContain('hearts');
-			expect(SUITS).toContain('diamonds');
-			expect(SUITS).toContain('clubs');
-			expect(SUITS).toContain('spades');
+			expect(SUITS).toContain('Harten');
+			expect(SUITS).toContain('Ruiten');
+			expect(SUITS).toContain('Klaver');
+			expect(SUITS).toContain('Schoppen');
 		});
 
 		it('should have 8 ranks (7-A)', () => {
@@ -134,72 +134,72 @@ describe('deck', () => {
 
 	describe('getCardPoints', () => {
 		describe('non-trump', () => {
-			const trump: Suit = 'hearts';
+			const trump: Suit = 'Harten';
 
 			it('should return 11 for Ace', () => {
-				expect(getCardPoints({ suit: 'spades', rank: 'A' }, trump)).toBe(11);
+				expect(getCardPoints({ suit: 'Schoppen', rank: 'A' }, trump)).toBe(11);
 			});
 
 			it('should return 10 for 10', () => {
-				expect(getCardPoints({ suit: 'spades', rank: '10' }, trump)).toBe(10);
+				expect(getCardPoints({ suit: 'Schoppen', rank: '10' }, trump)).toBe(10);
 			});
 
 			it('should return 4 for King', () => {
-				expect(getCardPoints({ suit: 'spades', rank: 'K' }, trump)).toBe(4);
+				expect(getCardPoints({ suit: 'Schoppen', rank: 'K' }, trump)).toBe(4);
 			});
 
 			it('should return 3 for Queen', () => {
-				expect(getCardPoints({ suit: 'spades', rank: 'Q' }, trump)).toBe(3);
+				expect(getCardPoints({ suit: 'Schoppen', rank: 'Q' }, trump)).toBe(3);
 			});
 
 			it('should return 2 for Jack', () => {
-				expect(getCardPoints({ suit: 'spades', rank: 'J' }, trump)).toBe(2);
+				expect(getCardPoints({ suit: 'Schoppen', rank: 'J' }, trump)).toBe(2);
 			});
 
 			it('should return 0 for 9, 8, 7', () => {
-				expect(getCardPoints({ suit: 'spades', rank: '9' }, trump)).toBe(0);
-				expect(getCardPoints({ suit: 'spades', rank: '8' }, trump)).toBe(0);
-				expect(getCardPoints({ suit: 'spades', rank: '7' }, trump)).toBe(0);
+				expect(getCardPoints({ suit: 'Schoppen', rank: '9' }, trump)).toBe(0);
+				expect(getCardPoints({ suit: 'Schoppen', rank: '8' }, trump)).toBe(0);
+				expect(getCardPoints({ suit: 'Schoppen', rank: '7' }, trump)).toBe(0);
 			});
 		});
 
 		describe('trump', () => {
-			const trump: Suit = 'hearts';
+			const trump: Suit = 'Harten';
 
 			it('should return 20 for Jack of trump (Nel)', () => {
-				expect(getCardPoints({ suit: 'hearts', rank: 'J' }, trump)).toBe(20);
+				expect(getCardPoints({ suit: 'Harten', rank: 'J' }, trump)).toBe(20);
 			});
 
 			it('should return 14 for 9 of trump (Nell)', () => {
-				expect(getCardPoints({ suit: 'hearts', rank: '9' }, trump)).toBe(14);
+				expect(getCardPoints({ suit: 'Harten', rank: '9' }, trump)).toBe(14);
 			});
 
 			it('should return 11 for Ace of trump', () => {
-				expect(getCardPoints({ suit: 'hearts', rank: 'A' }, trump)).toBe(11);
+				expect(getCardPoints({ suit: 'Harten', rank: 'A' }, trump)).toBe(11);
 			});
 
 			it('should return 10 for 10 of trump', () => {
-				expect(getCardPoints({ suit: 'hearts', rank: '10' }, trump)).toBe(10);
+				expect(getCardPoints({ suit: 'Harten', rank: '10' }, trump)).toBe(10);
 			});
 
 			it('should return 4 for King of trump', () => {
-				expect(getCardPoints({ suit: 'hearts', rank: 'K' }, trump)).toBe(4);
+				expect(getCardPoints({ suit: 'Harten', rank: 'K' }, trump)).toBe(4);
 			});
 
 			it('should return 3 for Queen of trump', () => {
-				expect(getCardPoints({ suit: 'hearts', rank: 'Q' }, trump)).toBe(3);
+				expect(getCardPoints({ suit: 'Harten', rank: 'Q' }, trump)).toBe(3);
 			});
 
 			it('should return 0 for 8 and 7 of trump', () => {
-				expect(getCardPoints({ suit: 'hearts', rank: '8' }, trump)).toBe(0);
-				expect(getCardPoints({ suit: 'hearts', rank: '7' }, trump)).toBe(0);
+				expect(getCardPoints({ suit: 'Harten', rank: '8' }, trump)).toBe(0);
+				expect(getCardPoints({ suit: 'Harten', rank: '7' }, trump)).toBe(0);
 			});
 		});
 
 		describe('total points', () => {
 			it('should sum to 152 for all cards (without last trick bonus)', () => {
 				const deck = createDeck();
-				const trump: Suit = 'hearts';
+				const trump: Suit = 'Harten';
 				const total = deck.reduce((sum, card) => sum + getCardPoints(card, trump), 0);
 				expect(total).toBe(152);
 			});
@@ -207,61 +207,61 @@ describe('deck', () => {
 	});
 
 	describe('compareCards', () => {
-		const trump: Suit = 'hearts';
+		const trump: Suit = 'Harten';
 
 		describe('same non-trump suit', () => {
 			it('should rank Ace highest', () => {
-				const ace: Card = { suit: 'spades', rank: 'A' };
-				const ten: Card = { suit: 'spades', rank: '10' };
-				expect(compareCards(ace, ten, trump, 'spades')).toBeGreaterThan(0);
+				const ace: Card = { suit: 'Schoppen', rank: 'A' };
+				const ten: Card = { suit: 'Schoppen', rank: '10' };
+				expect(compareCards(ace, ten, trump, 'Schoppen')).toBeGreaterThan(0);
 			});
 
 			it('should rank 10 above King', () => {
-				const ten: Card = { suit: 'spades', rank: '10' };
-				const king: Card = { suit: 'spades', rank: 'K' };
-				expect(compareCards(ten, king, trump, 'spades')).toBeGreaterThan(0);
+				const ten: Card = { suit: 'Schoppen', rank: '10' };
+				const king: Card = { suit: 'Schoppen', rank: 'K' };
+				expect(compareCards(ten, king, trump, 'Schoppen')).toBeGreaterThan(0);
 			});
 
 			it('should rank 7 lowest', () => {
-				const seven: Card = { suit: 'spades', rank: '7' };
-				const eight: Card = { suit: 'spades', rank: '8' };
-				expect(compareCards(seven, eight, trump, 'spades')).toBeLessThan(0);
+				const seven: Card = { suit: 'Schoppen', rank: '7' };
+				const eight: Card = { suit: 'Schoppen', rank: '8' };
+				expect(compareCards(seven, eight, trump, 'Schoppen')).toBeLessThan(0);
 			});
 		});
 
 		describe('trump suit', () => {
 			it('should rank Jack (Nel) highest', () => {
-				const jack: Card = { suit: 'hearts', rank: 'J' };
-				const nine: Card = { suit: 'hearts', rank: '9' };
-				expect(compareCards(jack, nine, trump, 'hearts')).toBeGreaterThan(0);
+				const jack: Card = { suit: 'Harten', rank: 'J' };
+				const nine: Card = { suit: 'Harten', rank: '9' };
+				expect(compareCards(jack, nine, trump, 'Harten')).toBeGreaterThan(0);
 			});
 
 			it('should rank 9 (Nell) second highest', () => {
-				const nine: Card = { suit: 'hearts', rank: '9' };
-				const ace: Card = { suit: 'hearts', rank: 'A' };
-				expect(compareCards(nine, ace, trump, 'hearts')).toBeGreaterThan(0);
+				const nine: Card = { suit: 'Harten', rank: '9' };
+				const ace: Card = { suit: 'Harten', rank: 'A' };
+				expect(compareCards(nine, ace, trump, 'Harten')).toBeGreaterThan(0);
 			});
 
 			it('should rank trump over non-trump', () => {
-				const trumpSeven: Card = { suit: 'hearts', rank: '7' };
-				const nonTrumpAce: Card = { suit: 'spades', rank: 'A' };
-				expect(compareCards(trumpSeven, nonTrumpAce, trump, 'spades')).toBeGreaterThan(0);
+				const trumpSeven: Card = { suit: 'Harten', rank: '7' };
+				const nonTrumpAce: Card = { suit: 'Schoppen', rank: 'A' };
+				expect(compareCards(trumpSeven, nonTrumpAce, trump, 'Schoppen')).toBeGreaterThan(0);
 			});
 		});
 
 		describe('different non-trump suits', () => {
 			it('should rank led suit over non-led suit', () => {
-				const ledSuit: Card = { suit: 'spades', rank: '7' };
-				const otherSuit: Card = { suit: 'clubs', rank: 'A' };
-				expect(compareCards(ledSuit, otherSuit, trump, 'spades')).toBeGreaterThan(0);
+				const ledSuit: Card = { suit: 'Schoppen', rank: '7' };
+				const otherSuit: Card = { suit: 'Klaver', rank: 'A' };
+				expect(compareCards(ledSuit, otherSuit, trump, 'Schoppen')).toBeGreaterThan(0);
 			});
 		});
 	});
 
 	describe('cardToString', () => {
-		it('should format card as "rank of suit"', () => {
-			expect(cardToString({ suit: 'hearts', rank: 'A' })).toBe('A of hearts');
-			expect(cardToString({ suit: 'spades', rank: '10' })).toBe('10 of spades');
+		it('should format card as "suit rank"', () => {
+			expect(cardToString({ suit: 'Harten', rank: 'A' })).toBe('Harten A');
+			expect(cardToString({ suit: 'Schoppen', rank: '10' })).toBe('Schoppen 10');
 		});
 	});
 });
