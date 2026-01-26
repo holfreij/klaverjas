@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { generateLobbyCode, generatePlayerId, isLobbyFull, getPlayersBySeat } from '$lib/multiplayer/lobby';
-import type { Lobby, LobbyPlayer } from '$lib/multiplayer/types';
+import type { Lobby, LobbyPlayer, Seat } from '$lib/multiplayer/types';
 
 describe('generateLobbyCode', () => {
 	it('should generate a 6-character code', () => {
@@ -58,7 +58,7 @@ describe('generatePlayerId', () => {
 });
 
 describe('isLobbyFull', () => {
-	function createLobby(seats: (number | 'spectator' | 'table')[]): Lobby {
+	function createLobby(seats: Seat[]): Lobby {
 		const players: Record<string, LobbyPlayer> = {};
 		seats.forEach((seat, i) => {
 			players[`player${i}`] = {
@@ -117,7 +117,7 @@ describe('isLobbyFull', () => {
 
 describe('getPlayersBySeat', () => {
 	function createLobby(
-		playersData: { seat: number | 'spectator' | 'table'; name: string }[]
+		playersData: { seat: Seat; name: string }[]
 	): Lobby {
 		const players: Record<string, LobbyPlayer> = {};
 		playersData.forEach((p, i) => {

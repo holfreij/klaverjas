@@ -30,3 +30,14 @@ export {
 } from './lobby';
 export { saveSession, loadSession, clearSession, hasSession } from './session';
 export { subscribeConnectionStatus, type ConnectionStatus } from './connection';
+export {
+	startGame,
+	selectTrump,
+	playCardMultiplayer,
+	claimRoemMultiplayer,
+	subscribeGame,
+	requestRematch,
+	isPlayerTurn,
+	getHandForSeat,
+	getLegalMovesForPlayer,
+} from './game';

@@ -1,8 +1,74 @@
 # Implementation Plan
 
-Current stage: **Stage 4 - Multiplayer Foundation** (Complete)
+Current stage: **Stage 5 - Full Multiplayer Game** (Complete)
 
 See [plans/roadmap.md](plans/roadmap.md) for the full project roadmap.
+
+---
+
+## Stage 5 - Complete
+
+### Firebase Game Operations (src/lib/multiplayer/game.ts)
+
+- [x] **startGame()** - Initialize game state in Firebase
+  - Creates dealt hands, sets phase to 'trump'
+  - Updates lobby status to 'playing'
+
+- [x] **selectTrump()** - Player selects trump suit
+  - Validates it's the player's turn
+  - Sets trump and playing team
+
+- [x] **playCardMultiplayer()** - Play a card with validation
+  - Validates it's player's turn
+  - Validates card is in hand
+  - Validates move is legal (rules check)
+  - Updates game state in Firebase
+  - Handles trick completion
+
+- [x] **claimRoemMultiplayer()** - Handle roem claims
+  - Validates claim against player's cards
+  - Adds validated claim to game state
+
+- [x] **subscribeGame()** - Real-time game state sync
+
+- [x] **requestRematch()** - Reset game for new game
+
+- [x] **Helper functions** - isPlayerTurn, getHandForSeat, getLegalMovesForPlayer
+
+### Multiplayer Game Store (src/lib/stores/)
+
+- [x] **multiplayerGameStore.svelte.ts** - Reactive game state
+  - Firebase sync integration
+  - Private hand view (only player's own hand)
+  - Turn enforcement helpers
+  - Game actions (selectTrump, playCard, claimRoem)
+
+### UI Updates
+
+- [x] **lobby/+page.svelte** - Start game functionality
+  - Implement handleStartGame() to call startGame()
+  - Navigate to game page when game starts
+
+- [x] **game/+page.svelte** - Multiplayer game page
+  - Private hand view (only see own cards)
+  - Other players show card count only
+  - Turn indicator and enforcement
+  - Trump selection phase UI
+  - Score display
+
+### Game Flow
+
+- [x] Trump selection phase (multiplayer)
+- [x] Round progression with Firebase sync
+- [x] Score tracking across rounds
+- [x] Game completion detection
+- [x] Final scores display
+- [x] Rematch functionality
+
+### Test Coverage
+
+- [x] Unit tests for game.ts functions (19 new tests)
+- Total: 142 unit tests passing
 
 ---
 
@@ -76,7 +142,6 @@ See [plans/roadmap.md](plans/roadmap.md) for the full project roadmap.
 ### Test Coverage
 
 - 17 new unit tests for lobby utilities
-- Total: 123 unit tests passing
 
 ---
 
@@ -136,16 +201,14 @@ See [plans/roadmap.md](plans/roadmap.md) for the full project roadmap.
 
 ## Next Stage Preview
 
-**Stage 5: Full Multiplayer Game** - Complete online play.
+**Stage 6: Advanced Features** - Spectator and Table modes.
 
 Key tasks:
-- Private hand view (only see your own cards)
-- Turn enforcement (only active player can play)
-- Server-side move validation (prevent cheating)
-- Trump selection phase (multiplayer)
-- Round progression
-- Score tracking across rounds
-- Game completion and final scores
-- Rematch functionality
+- Spectator role in lobby (can see all hands)
+- Table device mode (shows played cards only)
+- Between-round statistics
+- Last trick replay
+- Visual feedback when cards are played
+- Sound effects (optional)
 
-See [specs/multiplayer.md](specs/multiplayer.md) for multiplayer specifications.
+See [specs/table-device.md](specs/table-device.md) for table device specifications.

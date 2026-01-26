@@ -3,11 +3,13 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { lobbyStore } from '$lib/stores/lobbyStore.svelte';
+	import { multiplayerGameStore } from '$lib/stores/multiplayerGameStore.svelte';
 	import type { Seat } from '$lib/multiplayer';
 	import ConnectionStatus from '$lib/components/ConnectionStatus.svelte';
 	import LobbyPlayerList from '$lib/components/LobbyPlayerList.svelte';
 
 	let copied = $state(false);
+	let isStarting = $state(false);
 
 	onMount(() => {
 		lobbyStore.initialize();
@@ -15,6 +17,17 @@
 		// Redirect to home if not in a lobby
 		if (!lobbyStore.isInLobby) {
 			goto(base || '/');
+		}
+	});
+
+	// Watch for game start and navigate to game page
+	$effect(() => {
+		if (lobbyStore.lobby?.status === 'playing') {
+			// Subscribe to game updates before navigating
+			if (lobbyStore.session) {
+				multiplayerGameStore.subscribeToGame(lobbyStore.session.lobbyCode);
+			}
+			goto(`${base}/game`);
 		}
 	});
 
@@ -31,9 +44,17 @@
 		}
 	}
 
-	function handleStartGame() {
-		// TODO: Implement game start in Stage 5
-		alert('Starting game... (coming in Stage 5)');
+	async function handleStartGame() {
+		if (isStarting) return;
+
+		try {
+			isStarting = true;
+			await multiplayerGameStore.start();
+			// Navigation will happen via the $effect watching lobby.status
+		} catch (err) {
+			console.error('Failed to start game:', err);
+			isStarting = false;
+		}
 	}
 
 	async function copyCode() {
@@ -105,10 +126,10 @@
 				{#if lobbyStore.isHost}
 					<button
 						onclick={handleStartGame}
-						disabled={!lobbyStore.canStartGame}
+						disabled={!lobbyStore.canStartGame || isStarting}
 						class="px-8 py-4 bg-amber-600 hover:bg-amber-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold text-xl rounded-lg transition-colors"
 					>
-						Start Game
+						{isStarting ? 'Starting...' : 'Start Game'}
 					</button>
 				{:else}
 					<p class="text-center text-gray-400 text-sm">
