@@ -11,15 +11,15 @@
 
 	// Get player names from lobby
 	function getPlayerName(seat: number): string {
-		const seatNames = ['South', 'West', 'North', 'East'];
+		const seatNames = ['Zuid', 'West', 'Noord', 'Oost'];
 		if (!lobbyStore.lobby) return seatNames[seat];
 
 		for (const [playerId, player] of Object.entries(lobbyStore.lobby.players)) {
 			if (player.seat === seat) {
 				const name = player.name;
-				// Add "(You)" indicator for the current player
+				// Add "(Jij)" indicator for the current player
 				if (playerId === lobbyStore.session?.playerId) {
-					return `${name} (You)`;
+					return `${name} (Jij)`;
 				}
 				return name;
 			}
@@ -153,25 +153,25 @@
 	<!-- Loading state -->
 	{#if !multiplayerGameStore.game}
 		<div class="flex-1 flex items-center justify-center">
-			<p class="text-green-400">Loading game...</p>
+			<p class="text-green-400">Spel laden...</p>
 		</div>
 	{:else}
 		<!-- Game finished overlay -->
 		{#if multiplayerGameStore.isGameOver}
 			<div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
 				<div class="bg-green-800 rounded-lg p-8 text-center">
-					<h2 class="text-3xl font-bold text-white mb-4">Game Over!</h2>
+					<h2 class="text-3xl font-bold text-white mb-4">Spel Afgelopen!</h2>
 					<div class="text-xl text-green-200 mb-6">
 						{#if multiplayerGameStore.scores.NS > multiplayerGameStore.scores.WE}
-							North-South wins!
+							Wij winnen!
 						{:else if multiplayerGameStore.scores.WE > multiplayerGameStore.scores.NS}
-							West-East wins!
+							Zij winnen!
 						{:else}
-							It's a tie!
+							Gelijkspel!
 						{/if}
 					</div>
 					<div class="text-lg text-white mb-6">
-						Final Score: NS {multiplayerGameStore.scores.NS} - WE {multiplayerGameStore.scores.WE}
+						Eindstand: Wij {multiplayerGameStore.scores.NS} - Zij {multiplayerGameStore.scores.WE}
 					</div>
 					<div class="flex gap-3 justify-center">
 						{#if lobbyStore.isHost}
@@ -180,17 +180,17 @@
 								class="px-6 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg font-bold"
 								onclick={handleRematch}
 							>
-								Play Again
+								Opnieuw Spelen
 							</button>
 						{:else}
-							<p class="text-green-300 text-sm">Waiting for host to start rematch...</p>
+							<p class="text-green-300 text-sm">Wachten tot de host opnieuw start...</p>
 						{/if}
 						<button
 							type="button"
 							class="px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg"
 							onclick={handleLeave}
 						>
-							Leave
+							Verlaten
 						</button>
 					</div>
 				</div>
@@ -208,7 +208,7 @@
 				{:else}
 					<div class="bg-green-800 rounded-lg p-6 text-center">
 						<p class="text-white text-xl">
-							{playerNames[multiplayerGameStore.currentPlayer ?? 0]} is selecting trump...
+							{playerNames[multiplayerGameStore.currentPlayer ?? 0]} kiest troef...
 						</p>
 					</div>
 				{/if}
@@ -222,7 +222,7 @@
 				<span class="text-green-300 text-sm mb-1 {multiplayerGameStore.currentPlayer === 2 ? 'text-amber-400 font-bold' : ''}">
 					{playerNames[2]}
 					{#if mySeat !== 2}
-						<span class="text-green-500">({multiplayerGameStore.getHandCount(2)} cards)</span>
+						<span class="text-green-500">({multiplayerGameStore.getHandCount(2)} kaarten)</span>
 					{/if}
 				</span>
 				{#if mySeat === 2}
@@ -302,7 +302,7 @@
 				<span class="text-green-300 text-sm mb-1 {multiplayerGameStore.currentPlayer === 0 ? 'text-amber-400 font-bold' : ''}">
 					{playerNames[0]}
 					{#if mySeat !== 0}
-						<span class="text-green-500">({multiplayerGameStore.getHandCount(0)} cards)</span>
+						<span class="text-green-500">({multiplayerGameStore.getHandCount(0)} kaarten)</span>
 					{/if}
 				</span>
 				{#if mySeat === 0}
@@ -327,10 +327,10 @@
 				<TrumpIndicator trump={multiplayerGameStore.trump} playingTeam={multiplayerGameStore.playingTeam} />
 			{/if}
 			<div class="text-green-400 text-xs mt-1">
-				Trick {multiplayerGameStore.completedTricks.length + 1}/8 •
-				Round {multiplayerGameStore.round}/16
+				Slag {multiplayerGameStore.completedTricks.length + 1}/8 •
+				Ronde {multiplayerGameStore.round}/16
 				{#if multiplayerGameStore.isMyTurn}
-					• <span class="text-amber-400">Your turn!</span>
+					• <span class="text-amber-400">Jouw beurt!</span>
 				{/if}
 			</div>
 		</footer>

@@ -14,7 +14,7 @@
 		currentTrick,
 		trump,
 		currentPlayer,
-		playerNames = ['South', 'West', 'North', 'East'],
+		playerNames = ['Zuid', 'West', 'Noord', 'Oost'],
 	}: Props = $props();
 
 	// Map player positions to visual positions on the table
@@ -52,7 +52,7 @@
 	<!-- Trump indicator -->
 	{#if trump}
 		<div class="absolute top-2 right-2 bg-green-900 rounded px-2 py-1 flex items-center gap-1">
-			<span class="text-green-300 text-xs">Trump:</span>
+			<span class="text-green-300 text-xs">Troef:</span>
 			<span class="text-xl {suitColors[trump]}">{suitSymbols[trump]}</span>
 		</div>
 	{/if}
@@ -84,9 +84,9 @@
 	{#if currentTrick.length === 0}
 		<div class="absolute inset-0 flex items-center justify-center text-green-600 text-sm">
 			{#if trump}
-				Play a card
+				Speel een kaart
 			{:else}
-				Select trump
+				Kies troef
 			{/if}
 		</div>
 	{/if}

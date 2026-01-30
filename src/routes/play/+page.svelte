@@ -3,7 +3,7 @@
 	import { gameStore } from '$lib/stores/gameStore.svelte';
 	import type { Card } from '$lib/game/deck';
 
-	const playerNames = ['South (You)', 'West', 'North', 'East'];
+	const playerNames = ['Zuid (Jij)', 'West', 'Noord', 'Oost'];
 
 	function handleCardSelect(card: Card) {
 		gameStore.play(card);
@@ -45,7 +45,7 @@
 				class="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded text-sm"
 				onclick={handleNewGame}
 			>
-				New Game
+				Nieuw Spel
 			</button>
 		</div>
 	</header>
@@ -54,25 +54,25 @@
 	{#if gameStore.isGameOver}
 		<div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
 			<div class="bg-green-800 rounded-lg p-8 text-center">
-				<h2 class="text-3xl font-bold text-white mb-4">Game Over!</h2>
+				<h2 class="text-3xl font-bold text-white mb-4">Spel Afgelopen!</h2>
 				<div class="text-xl text-green-200 mb-6">
 					{#if gameStore.state.winner === 'NS'}
-						North-South wins!
+						Wij winnen!
 					{:else if gameStore.state.winner === 'WE'}
-						West-East wins!
+						Zij winnen!
 					{:else}
-						It's a tie!
+						Gelijkspel!
 					{/if}
 				</div>
 				<div class="text-lg text-white mb-6">
-					Final Score: NS {gameStore.state.scores.NS} - WE {gameStore.state.scores.WE}
+					Eindstand: Wij {gameStore.state.scores.NS} - Zij {gameStore.state.scores.WE}
 				</div>
 				<button
 					type="button"
 					class="px-6 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg font-bold"
 					onclick={handleNewGame}
 				>
-					Play Again
+					Opnieuw Spelen
 				</button>
 			</div>
 		</div>
@@ -160,8 +160,8 @@
 			<TrumpIndicator trump={gameStore.state.trump} playingTeam={gameStore.state.playingTeam} />
 		{/if}
 		<div class="text-green-400 text-xs mt-1">
-			Trick {gameStore.state.completedTricks.length + 1}/8 •
-			God Mode (all hands visible)
+			Slag {gameStore.state.completedTricks.length + 1}/8 •
+			God Mode (alle handen zichtbaar)
 		</div>
 	</footer>
 </div>

@@ -59,7 +59,7 @@
 	</div>
 
 	<h1 class="text-4xl font-bold mb-4">Klaverjas</h1>
-	<p class="text-lg text-green-200 mb-8">Online multiplayer card game</p>
+	<p class="text-lg text-green-200 mb-8">Online kaartspel voor meerdere spelers</p>
 
 	{#if lobbyStore.error}
 		<div class="mb-4 p-3 bg-red-600/80 rounded-lg text-white max-w-sm text-center">
@@ -73,31 +73,31 @@
 				onclick={() => (mode = 'host')}
 				class="px-8 py-4 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xl rounded-lg transition-colors"
 			>
-				Host Game
+				Spel Starten
 			</button>
 
 			<button
 				onclick={() => (mode = 'join')}
 				class="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xl rounded-lg transition-colors"
 			>
-				Join Game
+				Deelnemen
 			</button>
 
 			<a
 				href="{base}/play"
 				class="px-8 py-4 bg-green-700 hover:bg-green-600 text-white font-bold text-xl rounded-lg transition-colors text-center"
 			>
-				Local Play
+				Lokaal Spelen
 			</a>
 		</div>
 	{:else if mode === 'host'}
 		<div class="w-full max-w-sm space-y-4">
-			<h2 class="text-2xl font-semibold text-center">Host a Game</h2>
+			<h2 class="text-2xl font-semibold text-center">Start een Spel</h2>
 
 			<input
 				type="text"
 				bind:value={playerName}
-				placeholder="Your name"
+				placeholder="Je naam"
 				class="w-full px-4 py-3 rounded-lg bg-green-800 border border-green-600 text-white placeholder-green-400 focus:outline-none focus:border-amber-500"
 				maxlength="20"
 			/>
@@ -107,24 +107,24 @@
 				disabled={!playerName.trim() || isLoading}
 				class="w-full px-8 py-4 bg-amber-600 hover:bg-amber-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold text-xl rounded-lg transition-colors"
 			>
-				{isLoading ? 'Creating...' : 'Create Lobby'}
+				{isLoading ? 'Aanmaken...' : 'Lobby Aanmaken'}
 			</button>
 
 			<button
 				onclick={handleBack}
 				class="w-full px-4 py-2 text-green-300 hover:text-white transition-colors"
 			>
-				Back
+				Terug
 			</button>
 		</div>
 	{:else if mode === 'join'}
 		<div class="w-full max-w-sm space-y-4">
-			<h2 class="text-2xl font-semibold text-center">Join a Game</h2>
+			<h2 class="text-2xl font-semibold text-center">Neem Deel aan een Spel</h2>
 
 			<input
 				type="text"
 				bind:value={playerName}
-				placeholder="Your name"
+				placeholder="Je naam"
 				class="w-full px-4 py-3 rounded-lg bg-green-800 border border-green-600 text-white placeholder-green-400 focus:outline-none focus:border-amber-500"
 				maxlength="20"
 			/>
@@ -132,7 +132,7 @@
 			<input
 				type="text"
 				bind:value={lobbyCode}
-				placeholder="Lobby code (e.g., ABC123)"
+				placeholder="Lobby code (bijv. ABC123)"
 				class="w-full px-4 py-3 rounded-lg bg-green-800 border border-green-600 text-white placeholder-green-400 focus:outline-none focus:border-amber-500 uppercase tracking-widest text-center text-xl"
 				maxlength="6"
 			/>
@@ -142,17 +142,17 @@
 				disabled={!playerName.trim() || !lobbyCode.trim() || isLoading}
 				class="w-full px-8 py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold text-xl rounded-lg transition-colors"
 			>
-				{isLoading ? 'Joining...' : 'Join Lobby'}
+				{isLoading ? 'Deelnemen...' : 'Deelnemen'}
 			</button>
 
 			<button
 				onclick={handleBack}
 				class="w-full px-4 py-2 text-green-300 hover:text-white transition-colors"
 			>
-				Back
+				Terug
 			</button>
 		</div>
 	{/if}
 
-	<p class="mt-8 text-sm text-green-400">Rotterdam rules</p>
+	<p class="mt-8 text-sm text-green-400">Rotterdamse regels</p>
 </div>

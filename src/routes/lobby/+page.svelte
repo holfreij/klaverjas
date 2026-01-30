@@ -82,7 +82,7 @@
 		{#if lobbyStore.lobby && lobbyStore.session}
 			<!-- Lobby Code -->
 			<div class="text-center mb-8">
-				<p class="text-green-400 text-sm mb-2">Share this code with other players:</p>
+				<p class="text-green-400 text-sm mb-2">Deel deze code met andere spelers:</p>
 				<button
 					onclick={copyCode}
 					class="inline-flex items-center gap-2 px-6 py-3 bg-green-800 hover:bg-green-700 rounded-lg transition-colors"
@@ -91,7 +91,7 @@
 						{lobbyStore.lobby.code}
 					</span>
 					<span class="text-sm text-green-400">
-						{copied ? 'Copied!' : 'Click to copy'}
+						{copied ? 'Gekopieerd!' : 'Klik om te kopieren'}
 					</span>
 				</button>
 			</div>
@@ -115,9 +115,9 @@
 			<!-- Status -->
 			<div class="text-center mb-6">
 				{#if lobbyStore.canStartGame}
-					<p class="text-green-400">All players are ready!</p>
+					<p class="text-green-400">Alle spelers zijn klaar!</p>
 				{:else}
-					<p class="text-yellow-400">Waiting for players... ({lobbyStore.players.filter(p => typeof p.player.seat === 'number').length}/4)</p>
+					<p class="text-yellow-400">Wachten op spelers... ({lobbyStore.players.filter(p => typeof p.player.seat === 'number').length}/4)</p>
 				{/if}
 			</div>
 
@@ -129,11 +129,11 @@
 						disabled={!lobbyStore.canStartGame || isStarting}
 						class="px-8 py-4 bg-amber-600 hover:bg-amber-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold text-xl rounded-lg transition-colors"
 					>
-						{isStarting ? 'Starting...' : 'Start Game'}
+						{isStarting ? 'Starten...' : 'Start Spel'}
 					</button>
 				{:else}
 					<p class="text-center text-gray-400 text-sm">
-						Waiting for host to start the game...
+						Wachten tot de host het spel start...
 					</p>
 				{/if}
 
@@ -141,12 +141,12 @@
 					onclick={handleLeave}
 					class="px-4 py-2 text-red-400 hover:text-red-300 transition-colors"
 				>
-					Leave Lobby
+					Lobby Verlaten
 				</button>
 			</div>
 		{:else}
 			<div class="text-center">
-				<p class="text-gray-400">Loading lobby...</p>
+				<p class="text-gray-400">Lobby laden...</p>
 			</div>
 		{/if}
 	</main>

@@ -8,9 +8,9 @@
 	let { status }: Props = $props();
 
 	const statusConfig = {
-		connecting: { text: 'Connecting...', color: 'bg-yellow-500' },
-		connected: { text: 'Connected', color: 'bg-green-500' },
-		disconnected: { text: 'Disconnected', color: 'bg-red-500' },
+		connecting: { text: 'Verbinden...', color: 'bg-yellow-500' },
+		connected: { text: 'Verbonden', color: 'bg-green-500' },
+		disconnected: { text: 'Verbinding verbroken', color: 'bg-red-500' },
 	};
 
 	let config = $derived(statusConfig[status]);

@@ -32,8 +32,8 @@
 </script>
 
 <div class="bg-green-800 rounded-lg p-4 shadow-lg">
-	<h2 class="text-white text-lg font-bold mb-2 text-center">Choose Trump</h2>
-	<p class="text-green-300 text-sm mb-4 text-center">{playerName}'s turn to select</p>
+	<h2 class="text-white text-lg font-bold mb-2 text-center">Kies Troef</h2>
+	<p class="text-green-300 text-sm mb-4 text-center">{playerName} mag troef kiezen</p>
 
 	<div class="grid grid-cols-2 gap-3">
 		{#each SUITS as suit}

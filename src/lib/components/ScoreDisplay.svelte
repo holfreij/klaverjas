@@ -20,20 +20,20 @@
 
 <div class="bg-green-900/80 rounded-lg p-3 text-sm min-w-48">
 	<div class="text-center text-green-400 mb-2">
-		Round {round} / {totalRounds}
+		Ronde {round} / {totalRounds}
 	</div>
 
 	<div class="grid grid-cols-3 gap-2 text-center">
 		<div class="text-green-300">Team</div>
-		<div class="text-green-300">Game</div>
+		<div class="text-green-300">Totaal</div>
 		{#if roundScores}
-			<div class="text-green-300">Round</div>
+			<div class="text-green-300">Ronde</div>
 		{:else}
 			<div></div>
 		{/if}
 
 		<div class="font-bold {playingTeam === 'NS' ? 'text-amber-400' : 'text-white'}">
-			N-S
+			Wij
 		</div>
 		<div class="text-white font-mono">{scores.NS}</div>
 		{#if roundScores}
@@ -43,7 +43,7 @@
 		{/if}
 
 		<div class="font-bold {playingTeam === 'WE' ? 'text-amber-400' : 'text-white'}">
-			W-E
+			Zij
 		</div>
 		<div class="text-white font-mono">{scores.WE}</div>
 		{#if roundScores}

@@ -23,23 +23,23 @@
 	};
 
 	const teamLabels: Record<string, string> = {
-		NS: 'North-South',
-		WE: 'West-East',
+		NS: 'Wij',
+		WE: 'Zij',
 	};
 </script>
 
 <div class="bg-green-900/80 rounded-lg px-3 py-2 flex items-center gap-3 text-sm">
 	{#if trump}
 		<div class="flex items-center gap-1">
-			<span class="text-green-400">Trump:</span>
+			<span class="text-green-400">Troef:</span>
 			<span class="text-3xl {suitColors[trump]}">{suitSymbols[trump]}</span>
 		</div>
 		{#if playingTeam}
 			<div class="text-green-300 border-l border-green-700 pl-3">
-				{teamLabels[playingTeam]} plays
+				{teamLabels[playingTeam]} speelt
 			</div>
 		{/if}
 	{:else}
-		<span class="text-green-400">No trump selected</span>
+		<span class="text-green-400">Geen troef gekozen</span>
 	{/if}
 </div>
