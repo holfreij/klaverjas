@@ -14,6 +14,7 @@ import {
 	markConnected,
 	isLobbyFull,
 	getPlayersBySeat,
+	getLobby,
 } from '$lib/multiplayer/lobby';
 import { saveSession, loadSession, clearSession } from '$lib/multiplayer/session';
 import {
@@ -21,6 +22,14 @@ import {
 	type ConnectionStatus,
 } from '$lib/multiplayer/connection';
 import type { Unsubscribe } from 'firebase/database';
+
+/**
+ * Hint for form pre-fill when reconnection fails.
+ */
+interface SessionHint {
+	playerName: string;
+	lobbyCode: string;
+}
 
 /**
  * Lobby store state.
@@ -31,6 +40,7 @@ interface LobbyState {
 	lobby: Lobby | null;
 	connectionStatus: ConnectionStatus;
 	error: string | null;
+	lastSessionHint: SessionHint | null;
 }
 
 function createLobbyStore() {
@@ -40,6 +50,7 @@ function createLobbyStore() {
 		lobby: null,
 		connectionStatus: 'connecting',
 		error: null,
+		lastSessionHint: null,
 	});
 
 	let lobbyUnsubscribe: Unsubscribe | null = null;
@@ -47,9 +58,12 @@ function createLobbyStore() {
 
 	/**
 	 * Initialize the store - call once on app start.
+	 * Returns true if successfully rejoined a lobby.
 	 */
-	function initialize() {
-		if (state.initialized) return;
+	async function initialize(): Promise<boolean> {
+		if (state.initialized) {
+			return state.session !== null && state.lobby !== null;
+		}
 
 		// Initialize Firebase
 		initFirebase();
@@ -68,51 +82,72 @@ function createLobbyStore() {
 
 		// Try to restore session
 		const savedSession = loadSession();
+		let success = false;
 		if (savedSession) {
 			// Attempt to rejoin the lobby
-			rejoinLobby(savedSession);
+			success = await rejoinLobby(savedSession);
 		}
 
 		state.initialized = true;
+		return success;
 	}
 
 	/**
 	 * Attempt to rejoin a lobby from a saved session.
+	 * Returns true if successfully rejoined, false otherwise.
 	 */
-	async function rejoinLobby(session: LocalSession) {
+	async function rejoinLobby(session: LocalSession): Promise<boolean> {
 		try {
+			// First, verify lobby exists and player is still in it
+			const lobby = await getLobby(session.lobbyCode);
+			if (!lobby) {
+				clearSession();
+				state.lastSessionHint = {
+					playerName: session.playerName,
+					lobbyCode: session.lobbyCode,
+				};
+				state.error = 'Lobby no longer exists';
+				return false;
+			}
+
+			if (!lobby.players[session.playerId]) {
+				clearSession();
+				state.lastSessionHint = {
+					playerName: session.playerName,
+					lobbyCode: session.lobbyCode,
+				};
+				state.error = 'Session expired. Rejoin with the same name to reclaim your seat.';
+				return false;
+			}
+
+			// Set session and lobby FIRST before subscribing
+			state.session = session;
+			state.lobby = lobby;
+			state.error = null;
+
 			// Subscribe to lobby updates
-			lobbyUnsubscribe = subscribeLobby(session.lobbyCode, (lobby) => {
-				if (!lobby) {
-					// Lobby no longer exists
+			lobbyUnsubscribe = subscribeLobby(session.lobbyCode, (lobbyUpdate) => {
+				if (!lobbyUpdate) {
 					clearSession();
 					state.session = null;
 					state.lobby = null;
-					state.error = 'Lobby no longer exists';
 					return;
 				}
-
-				// Check if we're still in the lobby
-				if (!lobby.players[session.playerId]) {
-					// We were removed from the lobby
-					clearSession();
-					state.session = null;
-					state.lobby = null;
-					state.error = 'You were removed from the lobby';
-					return;
-				}
-
-				state.lobby = lobby;
+				state.lobby = lobbyUpdate;
 			});
 
-			// Mark as connected
+			// Mark as connected and re-setup disconnect handler
 			await markConnected(session.lobbyCode, session.playerId);
-			state.session = session;
-			state.error = null;
+			return true;
 		} catch (err) {
 			console.error('Failed to rejoin lobby:', err);
 			clearSession();
+			state.lastSessionHint = {
+				playerName: session.playerName,
+				lobbyCode: session.lobbyCode,
+			};
 			state.error = 'Failed to rejoin lobby';
+			return false;
 		}
 	}
 
@@ -233,6 +268,9 @@ function createLobbyStore() {
 		},
 		get error() {
 			return state.error;
+		},
+		get lastSessionHint() {
+			return state.lastSessionHint;
 		},
 
 		// Derived state

@@ -9,13 +9,30 @@
 	let playerName = $state('');
 	let lobbyCode = $state('');
 	let isLoading = $state(false);
+	let isInitializing = $state(true);
 
-	onMount(() => {
-		lobbyStore.initialize();
+	onMount(async () => {
+		try {
+			const wasInLobby = await lobbyStore.initialize();
+			isInitializing = false;
 
-		// If already in a lobby, redirect to lobby page
-		if (lobbyStore.isInLobby) {
-			goto(`${base}/lobby`);
+			if (wasInLobby && lobbyStore.isInLobby) {
+				// Reconnected successfully - route to correct page based on status
+				const status = lobbyStore.lobby?.status;
+				if (status === 'playing') {
+					goto(`${base}/game`);
+				} else {
+					goto(`${base}/lobby`);
+				}
+			} else if (lobbyStore.lastSessionHint) {
+				// Reconnection failed - pre-fill form for easy rejoin
+				playerName = lobbyStore.lastSessionHint.playerName;
+				lobbyCode = lobbyStore.lastSessionHint.lobbyCode;
+				mode = 'join';
+			}
+		} catch (err) {
+			console.error('Failed to initialize:', err);
+			isInitializing = false;
 		}
 	});
 
@@ -39,7 +56,13 @@
 		isLoading = true;
 		try {
 			await lobbyStore.joinGame(lobbyCode.trim(), playerName.trim());
-			goto(`${base}/lobby`);
+			// Route to correct page based on lobby status
+			const status = lobbyStore.lobby?.status;
+			if (status === 'playing') {
+				goto(`${base}/game`);
+			} else {
+				goto(`${base}/lobby`);
+			}
 		} catch (err) {
 			console.error('Failed to join game:', err);
 		} finally {
@@ -61,13 +84,18 @@
 	<h1 class="text-4xl font-bold mb-4">Klaverjas</h1>
 	<p class="text-lg text-green-200 mb-8">Online kaartspel voor meerdere spelers</p>
 
-	{#if lobbyStore.error}
-		<div class="mb-4 p-3 bg-red-600/80 rounded-lg text-white max-w-sm text-center">
-			{lobbyStore.error}
+	{#if isInitializing}
+		<div class="text-center">
+			<p class="text-green-200">Verbinden...</p>
 		</div>
-	{/if}
+	{:else}
+		{#if lobbyStore.error}
+			<div class="mb-4 p-3 bg-red-600/80 rounded-lg text-white max-w-sm text-center">
+				{lobbyStore.error}
+			</div>
+		{/if}
 
-	{#if mode === 'menu'}
+		{#if mode === 'menu'}
 		<div class="flex flex-col gap-4 w-full max-w-xs">
 			<button
 				onclick={() => (mode = 'host')}
@@ -152,7 +180,8 @@
 				Terug
 			</button>
 		</div>
-	{/if}
+		{/if}
 
-	<p class="mt-8 text-sm text-green-400">Rotterdamse regels</p>
+		<p class="mt-8 text-sm text-green-400">Rotterdamse regels</p>
+	{/if}
 </div>

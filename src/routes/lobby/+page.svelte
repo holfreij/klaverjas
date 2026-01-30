@@ -10,12 +10,29 @@
 
 	let copied = $state(false);
 	let isStarting = $state(false);
+	let isInitializing = $state(true);
 
-	onMount(() => {
-		lobbyStore.initialize();
+	onMount(async () => {
+		try {
+			const wasInLobby = await lobbyStore.initialize();
+			isInitializing = false;
 
-		// Redirect to home if not in a lobby
-		if (!lobbyStore.isInLobby) {
+			if (!wasInLobby || !lobbyStore.isInLobby) {
+				// Not in a lobby, redirect to home
+				goto(base || '/');
+				return;
+			}
+
+			// If game is already in progress, go to game page
+			if (lobbyStore.lobby?.status === 'playing') {
+				if (lobbyStore.session) {
+					multiplayerGameStore.subscribeToGame(lobbyStore.session.lobbyCode);
+				}
+				goto(`${base}/game`);
+			}
+		} catch (err) {
+			console.error('Failed to initialize lobby page:', err);
+			isInitializing = false;
 			goto(base || '/');
 		}
 	});
@@ -79,7 +96,11 @@
 	</header>
 
 	<main class="flex-1 p-4 max-w-2xl mx-auto w-full">
-		{#if lobbyStore.lobby && lobbyStore.session}
+		{#if isInitializing}
+			<div class="text-center">
+				<p class="text-gray-400">Verbinden...</p>
+			</div>
+		{:else if lobbyStore.lobby && lobbyStore.session}
 			<!-- Lobby Code -->
 			<div class="text-center mb-8">
 				<p class="text-green-400 text-sm mb-2">Deel deze code met andere spelers:</p>

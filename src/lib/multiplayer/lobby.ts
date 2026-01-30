@@ -93,6 +93,8 @@ export async function createLobby(playerName: string): Promise<LocalSession> {
 
 /**
  * Join an existing lobby.
+ * Supports seat reclamation: if a disconnected player with the same name exists,
+ * the new player will reclaim their seat (even if game is in progress).
  */
 export async function joinLobby(
 	code: string,
@@ -109,7 +111,23 @@ export async function joinLobby(
 
 	const lobby = snapshot.val() as Lobby;
 
-	// Check lobby status
+	// Check if name is taken by a connected player
+	const connectedWithSameName = Object.values(lobby.players || {}).find(
+		(p) => p.name?.toLowerCase() === playerName?.toLowerCase() && p.connected
+	);
+	if (connectedWithSameName) {
+		throw new Error('Name already taken');
+	}
+
+	// Check for disconnected player with same name (seat reclaim)
+	const disconnectedPlayerId = findDisconnectedPlayerByName(lobby, playerName);
+	if (disconnectedPlayerId) {
+		// Reclaim the seat, even if game is in progress
+		const newPlayerId = generatePlayerId();
+		return reclaimSeat(normalizedCode, disconnectedPlayerId, newPlayerId, playerName);
+	}
+
+	// Normal join flow - only allowed in 'waiting' status
 	if (lobby.status !== 'waiting') {
 		throw new Error('Game already in progress');
 	}
@@ -299,4 +317,82 @@ export async function markConnected(
 
 	// Re-setup disconnect handler
 	await setupDisconnectHandler(code, playerId);
+}
+
+/**
+ * Find a disconnected player in the lobby by name.
+ * Returns the playerId if found, null otherwise.
+ */
+export function findDisconnectedPlayerByName(
+	lobby: Lobby,
+	playerName: string
+): string | null {
+	if (!playerName) return null;
+	for (const [playerId, player] of Object.entries(lobby.players || {})) {
+		if (
+			player.name?.toLowerCase() === playerName.toLowerCase() &&
+			!player.connected
+		) {
+			return playerId;
+		}
+	}
+	return null;
+}
+
+/**
+ * Reclaim a disconnected player's seat.
+ * Updates the player record with a new playerId and marks as connected.
+ */
+export async function reclaimSeat(
+	code: string,
+	oldPlayerId: string,
+	newPlayerId: string,
+	playerName: string
+): Promise<LocalSession> {
+	const normalizedCode = code.toUpperCase().trim();
+
+	const snapshot = await get(lobbyRef(normalizedCode));
+	if (!snapshot.exists()) {
+		throw new Error('Lobby not found');
+	}
+
+	const lobby = snapshot.val() as Lobby;
+	const oldPlayer = lobby.players[oldPlayerId];
+
+	if (!oldPlayer) {
+		throw new Error('Player not found');
+	}
+
+	if (oldPlayer.connected) {
+		throw new Error('Player is still connected');
+	}
+
+	// Create new player entry with the old seat
+	const newPlayer: LobbyPlayer = {
+		name: playerName,
+		seat: oldPlayer.seat,
+		connected: true,
+		lastSeen: Date.now(),
+	};
+
+	// Atomic update: remove old player, add new player
+	const updates: Record<string, unknown> = {};
+	updates[`players/${oldPlayerId}`] = null;
+	updates[`players/${newPlayerId}`] = newPlayer;
+
+	// If old player was host, transfer to new player
+	if (lobby.host === oldPlayerId) {
+		updates['host'] = newPlayerId;
+	}
+
+	await update(lobbyRef(normalizedCode), updates);
+
+	// Set up disconnect handler
+	await setupDisconnectHandler(normalizedCode, newPlayerId);
+
+	return {
+		playerId: newPlayerId,
+		playerName,
+		lobbyCode: normalizedCode,
+	};
 }

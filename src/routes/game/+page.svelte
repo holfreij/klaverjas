@@ -82,18 +82,33 @@
 		return fakeCards;
 	}
 
-	onMount(() => {
-		lobbyStore.initialize();
+	let isInitializing = $state(true);
 
-		// Redirect to home if not in a lobby
-		if (!lobbyStore.isInLobby) {
+	onMount(async () => {
+		try {
+			const wasInLobby = await lobbyStore.initialize();
+			isInitializing = false;
+
+			if (!wasInLobby || !lobbyStore.isInLobby) {
+				// Not in a lobby, redirect to home
+				goto(base || '/');
+				return;
+			}
+
+			// If lobby is in waiting state, go to lobby page
+			if (lobbyStore.lobby?.status === 'waiting') {
+				goto(`${base}/lobby`);
+				return;
+			}
+
+			// Subscribe to game state if not already subscribed
+			if (lobbyStore.session && !multiplayerGameStore.game) {
+				multiplayerGameStore.subscribeToGame(lobbyStore.session.lobbyCode);
+			}
+		} catch (err) {
+			console.error('Failed to initialize game page:', err);
+			isInitializing = false;
 			goto(base || '/');
-			return;
-		}
-
-		// Subscribe to game state if not already subscribed
-		if (lobbyStore.session && !multiplayerGameStore.game) {
-			multiplayerGameStore.subscribeToGame(lobbyStore.session.lobbyCode);
 		}
 	});
 
@@ -151,9 +166,9 @@
 	{/if}
 
 	<!-- Loading state -->
-	{#if !multiplayerGameStore.game}
+	{#if isInitializing || !multiplayerGameStore.game}
 		<div class="flex-1 flex items-center justify-center">
-			<p class="text-green-400">Spel laden...</p>
+			<p class="text-green-400">{isInitializing ? 'Verbinden...' : 'Spel laden...'}</p>
 		</div>
 	{:else}
 		<!-- Game finished overlay -->
