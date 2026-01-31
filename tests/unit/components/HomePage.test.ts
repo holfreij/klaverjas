@@ -23,7 +23,9 @@ const createMockStore = () => ({
 	tryReconnect: vi.fn(),
 	clearError: vi.fn(),
 	getPlayersBySeat: vi.fn(() => [] as Array<{ playerId: string; player: Player }>),
-	getPlayerAtSeat: vi.fn(() => null as { playerId: string; player: Player } | null)
+	getPlayerAtSeat: vi.fn(
+		(_seat: PlayerSeat | 'table') => null as { playerId: string; player: Player } | null
+	)
 });
 
 let mockStore = createMockStore();
@@ -152,7 +154,7 @@ describe('HomePage', () => {
 		});
 
 		it('should show loading state during creation', async () => {
-			let resolveCreate: () => void;
+			let resolveCreate: (value?: unknown) => void;
 			mockStore.create.mockImplementation(
 				() => new Promise((resolve) => (resolveCreate = resolve))
 			);
@@ -245,7 +247,7 @@ describe('HomePage', () => {
 		});
 
 		it('should show loading state during join', async () => {
-			let resolveJoin: () => void;
+			let resolveJoin: (value?: unknown) => void;
 			mockStore.join.mockImplementation(() => new Promise((resolve) => (resolveJoin = resolve)));
 			render(HomePage);
 
