@@ -1,4 +1,4 @@
-import type { Lobby, ConnectionState, PlayerSeat, Seat } from '$lib/multiplayer/types';
+import type { Lobby, ConnectionState, Seat } from '$lib/multiplayer/types';
 import { canStartGame } from '$lib/multiplayer/lobby';
 import {
 	createLobby,
@@ -171,9 +171,7 @@ class LobbyStore {
 	/**
 	 * Gets the player at a specific seat.
 	 */
-	getPlayerAtSeat(
-		seat: Seat
-	): { playerId: string; player: Lobby['players'][string] } | null {
+	getPlayerAtSeat(seat: Seat): { playerId: string; player: Lobby['players'][string] } | null {
 		if (!this.lobby?.players) return null;
 
 		for (const [playerId, player] of Object.entries(this.lobby.players)) {

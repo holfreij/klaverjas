@@ -26,10 +26,10 @@ Spectator mode deferred for later.
 
 ### Roles
 
-| Role | Count | Capabilities |
-|------|-------|--------------|
-| Player | 4 | See own hand, play cards, claim roem, call verzaakt |
-| Table | 1 | Read-only display of trick area and scores |
+| Role   | Count | Capabilities                                        |
+| ------ | ----- | --------------------------------------------------- |
+| Player | 4     | See own hand, play cards, claim roem, call verzaakt |
+| Table  | 1     | Read-only display of trick area and scores          |
 
 ### Seat Assignment
 
@@ -50,70 +50,70 @@ Spectator mode deferred for later.
 
 ```typescript
 interface Lobby {
-  code: string;
-  host: string; // player ID
-  createdAt: number;
-  status: 'waiting' | 'playing' | 'finished';
-  players: {
-    [playerId: string]: {
-      name: string;
-      seat: 0 | 1 | 2 | 3 | 'table';
-      connected: boolean;
-      lastSeen: number;
-    }
-  };
-  game: GameState | null;
+	code: string;
+	host: string; // player ID
+	createdAt: number;
+	status: 'waiting' | 'playing' | 'finished';
+	players: {
+		[playerId: string]: {
+			name: string;
+			seat: 0 | 1 | 2 | 3 | 'table';
+			connected: boolean;
+			lastSeen: number;
+		};
+	};
+	game: GameState | null;
 }
 
 interface GameState {
-  phase: 'trump' | 'playing' | 'trickEnd' | 'roundEnd' | 'gameEnd';
-  round: number; // 1-16
-  trick: number; // 1-8 within round
-  dealer: number; // seat number (0-3)
-  trump: Suit | null;
-  trumpChooser: number; // seat number who chose trump
-  playingTeam: 'ns' | 'we' | null;
-  currentPlayer: number; // seat number (0-3)
+	phase: 'trump' | 'playing' | 'trickEnd' | 'roundEnd' | 'gameEnd';
+	round: number; // 1-16
+	trick: number; // 1-8 within round
+	dealer: number; // seat number (0-3)
+	trump: Suit | null;
+	trumpChooser: number; // seat number who chose trump
+	playingTeam: 'ns' | 'we' | null;
+	currentPlayer: number; // seat number (0-3)
 
-  // Hand snapshots for verzaakt detection
-  handsAtTrickStart: {
-    [seat: number]: Card[];
-  };
-  hands: {
-    [seat: number]: Card[];
-  };
+	// Hand snapshots for verzaakt detection
+	handsAtTrickStart: {
+		[seat: number]: Card[];
+	};
+	hands: {
+		[seat: number]: Card[];
+	};
 
-  currentTrick: PlayedCard[];
-  completedTricks: CompletedTrick[];
+	currentTrick: PlayedCard[];
+	completedTricks: CompletedTrick[];
 
-  scores: {
-    ns: { base: number; roem: number; };
-    we: { base: number; roem: number; };
-  };
+	scores: {
+		ns: { base: number; roem: number };
+		we: { base: number; roem: number };
+	};
 
-  gameScores: {
-    ns: number;
-    we: number;
-  };
+	gameScores: {
+		ns: number;
+		we: number;
+	};
 
-  roemClaimed: boolean; // true if roem was claimed for current trick
-  roemClaimPending: {
-    playerId: string;
-    amount: number;
-  } | null;
+	roemClaimed: boolean; // true if roem was claimed for current trick
+	roemClaimPending: {
+		playerId: string;
+		amount: number;
+	} | null;
 
-  skipVotes: string[]; // player IDs who tapped to skip round-end display
+	skipVotes: string[]; // player IDs who tapped to skip round-end display
 }
 
 interface PlayedCard {
-  card: Card;
-  seat: number;
+	card: Card;
+	seat: number;
 }
 
 interface CompletedTrick {
-  cards: PlayedCard[];
-  winner: number; // seat
-  roem: number; // points
+	cards: PlayedCard[];
+	winner: number; // seat
+	roem: number; // points
 }
 ```
 
@@ -136,6 +136,7 @@ interface CompletedTrick {
 ### Optimistic Updates
 
 For smooth UX:
+
 1. Apply action locally immediately
 2. Send to Firebase
 3. If Firebase rejects, rollback local state
@@ -144,11 +145,11 @@ For smooth UX:
 
 ### Connection States
 
-| State | Dutch Message | Behavior |
-|-------|---------------|----------|
-| Connecting | "Verbinding maken..." | Show on load |
-| Connected | (none) | Normal gameplay |
-| Disconnected | "Verbinding verbroken" | Auto-retry, 5 min timeout |
+| State          | Dutch Message          | Behavior                         |
+| -------------- | ---------------------- | -------------------------------- |
+| Connecting     | "Verbinding maken..."  | Show on load                     |
+| Connected      | (none)                 | Normal gameplay                  |
+| Disconnected   | "Verbinding verbroken" | Auto-retry, 5 min timeout        |
 | Player offline | "Wachten op [name]..." | Host can dismiss, 1 hour timeout |
 
 ### Player Disconnect
@@ -228,14 +229,15 @@ CREATED → WAITING → PLAYING → FINISHED
 
 ## Configurable Timings
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| trickDelay | 1500ms | Delay after 4th card before trick collection |
-| roundEndDelay | 5000ms | How long to show round-end scores (skippable) |
+| Setting       | Default | Description                                   |
+| ------------- | ------- | --------------------------------------------- |
+| trickDelay    | 1500ms  | Delay after 4th card before trick collection  |
+| roundEndDelay | 5000ms  | How long to show round-end scores (skippable) |
 
 ## Test Scenarios
 
 ### Lobby Tests
+
 - Create lobby generates valid 6-digit code
 - Join lobby with valid code succeeds
 - Join lobby with invalid code fails with "Lobby niet gevonden"
@@ -248,6 +250,7 @@ CREATED → WAITING → PLAYING → FINISHED
 - Table device can join as 5th position
 
 ### Connection Tests
+
 - Disconnection updates `connected: false` in Firebase
 - Reconnection updates `connected: true` in Firebase
 - Session persists across page refresh
@@ -256,6 +259,7 @@ CREATED → WAITING → PLAYING → FINISHED
 - Firebase reconnect after retry works
 
 ### Game Sync Tests
+
 - Card played syncs to all clients
 - Trump selection syncs to all clients
 - Trick completion syncs to all clients

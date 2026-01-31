@@ -14,14 +14,14 @@ An online multiplayer Klaverjas card game (Rotterdam rules) as a PWA, deployed o
 
 ## Quick Reference
 
-| Technology | Purpose |
-|------------|---------|
-| SvelteKit | Framework (static adapter for GitHub Pages) |
-| TypeScript | Type safety |
-| Tailwind CSS v4 | Styling (via @tailwindcss/vite) |
-| Firebase Realtime Database | Multiplayer sync |
-| Vitest | Unit + integration testing |
-| Playwright | E2E testing |
+| Technology                 | Purpose                                     |
+| -------------------------- | ------------------------------------------- |
+| SvelteKit                  | Framework (static adapter for GitHub Pages) |
+| TypeScript                 | Type safety                                 |
+| Tailwind CSS v4            | Styling (via @tailwindcss/vite)             |
+| Firebase Realtime Database | Multiplayer sync                            |
+| Vitest                     | Unit + integration testing                  |
+| Playwright                 | E2E testing                                 |
 
 ## Commands
 
@@ -95,9 +95,11 @@ tests/
 ## Questions First (MANDATORY)
 
 ### Requirement
+
 Before implementing ANY feature, Claude MUST ask questions until the requirements are **crystal clear**. Do NOT take the path of least resistance by making assumptions.
 
 ### What to Ask About
+
 - **Game logic uncertainty** - "When X happens, should Y or Z occur?"
 - **Edge cases** - "What should happen if a player does X?"
 - **UI/UX design** - "How should this look? How should it behave?"
@@ -105,6 +107,7 @@ Before implementing ANY feature, Claude MUST ask questions until the requirement
 - **Ambiguous specs** - "The spec says X, but what about Y?"
 
 ### Hard Rules
+
 - There is NO limit on number of questions - ask 3 or ask 30, whatever is needed
 - Do NOT assume. If uncertain, ASK.
 - Do NOT implement and hope it's right. CONFIRM first.
@@ -112,7 +115,9 @@ Before implementing ANY feature, Claude MUST ask questions until the requirement
 - If the spec is ambiguous, ask for clarification before implementing
 
 ### When to Stop Asking
+
 Only proceed to implementation when:
+
 - You can explain exactly what you're building
 - You know all edge cases and how to handle them
 - You have no remaining doubts about behavior
@@ -121,10 +126,12 @@ Only proceed to implementation when:
 ## TDD Requirements (MANDATORY)
 
 ### Scope
+
 - ALL code requires tests first: game logic, multiplayer, stores, components
 - No exceptions - "it's trivial" is not valid
 
 ### Workflow (Mandatory Steps)
+
 1. **Enumerate ALL edge cases** before writing any code
 2. **Write failing test (RED)** - run tests, confirm failure
 3. **Implement minimum code (GREEN)** - run tests, confirm pass
@@ -132,7 +139,9 @@ Only proceed to implementation when:
 5. **Repeat** for each edge case
 
 ### Hard Stop Rules
+
 Claude MUST REFUSE to continue if:
+
 - No test file exists for code being modified
 - Tests not run after writing
 - Implementation written before test
@@ -141,23 +150,28 @@ Claude MUST REFUSE to continue if:
 - Skipping identified edge cases
 
 ### Test Categories
-| Code Type | Test Type | Location |
-|-----------|-----------|----------|
-| Pure functions | Unit tests | `tests/unit/` |
-| Firebase ops | Integration tests | `tests/integration/` |
-| Stores | Unit tests | `tests/unit/stores/` |
-| Components | Component tests | `tests/unit/components/` |
+
+| Code Type      | Test Type         | Location                 |
+| -------------- | ----------------- | ------------------------ |
+| Pure functions | Unit tests        | `tests/unit/`            |
+| Firebase ops   | Integration tests | `tests/integration/`     |
+| Stores         | Unit tests        | `tests/unit/stores/`     |
+| Components     | Component tests   | `tests/unit/components/` |
 
 ### Firebase Testing
+
 - NO mocking Firebase SDK
 - Use test project or emulator
 - Clean up test data after each test
 
 ### Test Running
+
 Run `npm run test` and verify output:
+
 - After writing each test (verify RED)
 - After implementing (verify GREEN)
 - Before any commit (ALL GREEN)
 
 ### Test Naming Convention
+
 Use descriptive test names: `it('should reject playing hearts when player has spades and spades were led')`

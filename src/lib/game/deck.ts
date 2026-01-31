@@ -45,7 +45,12 @@ export function shuffleDeck(deck: Card[]): Card[] {
 
 export function dealHands(deck: Card[]): [Hand, Hand, Hand, Hand] {
 	const deckCopy = [...deck];
-	return [deckCopy.slice(0, 8), deckCopy.slice(8, 16), deckCopy.slice(16, 24), deckCopy.slice(24, 32)];
+	return [
+		deckCopy.slice(0, 8),
+		deckCopy.slice(8, 16),
+		deckCopy.slice(16, 24),
+		deckCopy.slice(24, 32)
+	];
 }
 
 export function sortHand(hand: Hand): Hand {

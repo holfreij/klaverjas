@@ -2,7 +2,7 @@ import type { Card, Suit, Hand } from './deck';
 import { createDeck, shuffleDeck, dealHands } from './deck';
 import { determineTrickWinner, checkAllMovesInRound, type PlayedMove } from './rules';
 import { calculateTrickPoints, calculateRoundResult } from './scoring';
-import { getRoemPoints, validateRoemClaim } from './roem';
+import { validateRoemClaim } from './roem';
 
 export type Position = 'south' | 'west' | 'north' | 'east';
 export type Team = 'north_south' | 'west_east';
@@ -138,7 +138,11 @@ export function playCard(game: GameState, player: Position, card: Card): void {
 	game.round.currentPlayer = getNextPosition(player);
 }
 
-export function claimRoem(game: GameState, player: Position, claimedPoints: number): RoemClaimResult {
+export function claimRoem(
+	game: GameState,
+	player: Position,
+	claimedPoints: number
+): RoemClaimResult {
 	if (!game.round || !game.round.trump) throw new Error('No active round with trump');
 
 	const trickCards = game.round.currentTrick.map((tc) => tc.card);
@@ -152,7 +156,7 @@ export function claimRoem(game: GameState, player: Position, claimedPoints: numb
 	return { valid, points: valid ? claimedPoints : 0 };
 }
 
-export function callVerzaakt(game: GameState, caller: Position): VerzaaktResult {
+export function callVerzaakt(game: GameState, _caller: Position): VerzaaktResult {
 	if (!game.round || !game.round.trump) throw new Error('No active round with trump');
 
 	// Must have at least 2 cards in current trick to call verzaakt

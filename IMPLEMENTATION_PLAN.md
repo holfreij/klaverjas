@@ -9,6 +9,7 @@ See [plans/roadmap.md](plans/roadmap.md) for the full project roadmap.
 ## Stage 2 - Core Game Logic (TDD) - COMPLETED
 
 All implementation followed strict TDD workflow:
+
 1. Enumerate edge cases
 2. Write failing test (RED)
 3. Implement minimum code (GREEN)

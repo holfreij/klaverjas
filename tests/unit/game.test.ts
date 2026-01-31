@@ -11,8 +11,7 @@ import {
 	completeRound,
 	isGameComplete,
 	getGameResult,
-	type GameState,
-	type Position
+	type GameState
 } from '$lib/game/game';
 
 const card = (suit: Suit, rank: Card['rank']): Card => ({ suit, rank });

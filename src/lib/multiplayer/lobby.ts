@@ -56,10 +56,7 @@ export function canStartGame(players: Record<string, Player>): boolean {
  * Returns the player ID with the lowest seat number (excluding table device).
  * Returns null if no eligible player found.
  */
-export function getNewHost(
-	players: Record<string, Player>,
-	currentHostId: string
-): string | null {
+export function getNewHost(players: Record<string, Player>, currentHostId: string): string | null {
 	let newHostId: string | null = null;
 	let lowestSeat: PlayerSeat | null = null;
 

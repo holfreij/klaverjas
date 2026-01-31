@@ -32,16 +32,16 @@ Klaverjas is a Dutch trick-taking card game for 4 players in fixed partnerships.
 
 ### Trump Suit (Troef)
 
-| Card       | Rank (high to low) | Points |
-| ---------- | ------------------ | ------ |
-| Jack (Boer)| 1                  | 20     |
-| 9 (Nel)    | 2                  | 14     |
-| Ace        | 3                  | 11     |
-| 10         | 4                  | 10     |
-| King       | 5                  | 4      |
-| Queen      | 6                  | 3      |
-| 8          | 7                  | 0      |
-| 7          | 8                  | 0      |
+| Card        | Rank (high to low) | Points |
+| ----------- | ------------------ | ------ |
+| Jack (Boer) | 1                  | 20     |
+| 9 (Nel)     | 2                  | 14     |
+| Ace         | 3                  | 11     |
+| 10          | 4                  | 10     |
+| King        | 5                  | 4      |
+| Queen       | 6                  | 3      |
+| 8           | 7                  | 0      |
+| 7           | 8                  | 0      |
 
 **Total points per round**: 162 (152 from cards + 10 for last trick)
 
@@ -137,6 +137,7 @@ Roem is about the 4 cards in a **single trick** (one from each player). NOT abou
 **Sequence order**: 7-8-9-10-J-Q-K-A
 
 **Combined roem**: If cards form multiple combinations, points stack:
+
 - K-Q-J of trump = 20 (sequence) + 20 (stuk) = 40 points
 - A-K-Q-J of trump = 50 (4-sequence) + 20 (stuk) = 70 points
 
@@ -156,6 +157,7 @@ Roem is about the 4 cards in a **single trick** (one from each player). NOT abou
 ### Roem Ownership
 
 Roem ALWAYS goes to the team that wins the trick, regardless of:
+
 - Which team's cards formed the roem
 - Which player called out the roem
 

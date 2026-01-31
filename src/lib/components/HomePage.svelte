@@ -25,40 +25,38 @@
 	}
 </script>
 
-<div class="min-h-screen bg-green-900 flex items-center justify-center p-4">
+<div class="flex min-h-screen items-center justify-center bg-green-900 p-4">
 	<div class="w-full max-w-sm">
-		<h1 class="text-4xl font-bold text-white text-center mb-8">Klaverjas</h1>
+		<h1 class="mb-8 text-center text-4xl font-bold text-white">Klaverjas</h1>
 
 		<!-- Player name input (shared) -->
 		<div class="mb-6">
-			<label for="playerName" class="block text-green-300 text-sm mb-2">
-				Jouw naam
-			</label>
+			<label for="playerName" class="mb-2 block text-sm text-green-300"> Jouw naam </label>
 			<input
 				id="playerName"
 				type="text"
 				bind:value={playerName}
 				placeholder="Voer je naam in"
 				maxlength="50"
-				class="w-full px-4 py-3 rounded-lg bg-green-800 text-white placeholder-green-500 border border-green-700 focus:border-green-500 focus:outline-none"
+				class="w-full rounded-lg border border-green-700 bg-green-800 px-4 py-3 text-white placeholder-green-500 focus:border-green-500 focus:outline-none"
 			/>
 		</div>
 
 		<!-- Create lobby section -->
-		<div class="bg-green-800 rounded-lg p-4 mb-4">
-			<h2 class="text-lg font-semibold text-white mb-3">Nieuw spel</h2>
+		<div class="mb-4 rounded-lg bg-green-800 p-4">
+			<h2 class="mb-3 text-lg font-semibold text-white">Nieuw spel</h2>
 			<button
 				onclick={handleCreate}
 				disabled={isCreating || !playerName.trim()}
-				class="w-full bg-yellow-500 hover:bg-yellow-400 disabled:bg-green-700 disabled:text-green-500 text-green-900 font-bold py-3 rounded-lg transition-colors"
+				class="w-full rounded-lg bg-yellow-500 py-3 font-bold text-green-900 transition-colors hover:bg-yellow-400 disabled:bg-green-700 disabled:text-green-500"
 			>
 				{isCreating ? 'Bezig...' : 'Maak lobby'}
 			</button>
 		</div>
 
 		<!-- Join lobby section -->
-		<div class="bg-green-800 rounded-lg p-4">
-			<h2 class="text-lg font-semibold text-white mb-3">Deelnemen</h2>
+		<div class="rounded-lg bg-green-800 p-4">
+			<h2 class="mb-3 text-lg font-semibold text-white">Deelnemen</h2>
 			<div class="mb-3">
 				<input
 					id="lobbyCode"
@@ -67,13 +65,13 @@
 					bind:value={lobbyCodeRaw}
 					placeholder="6-cijferige code"
 					maxlength="12"
-					class="w-full px-4 py-3 rounded-lg bg-green-700 text-white text-center text-xl tracking-widest font-mono placeholder-green-500 border border-green-600 focus:border-green-500 focus:outline-none"
+					class="w-full rounded-lg border border-green-600 bg-green-700 px-4 py-3 text-center font-mono text-xl tracking-widest text-white placeholder-green-500 focus:border-green-500 focus:outline-none"
 				/>
 			</div>
 			<button
 				onclick={handleJoin}
 				disabled={isJoining || !canJoin}
-				class="w-full bg-green-600 hover:bg-green-500 disabled:bg-green-700 disabled:text-green-500 text-white font-bold py-3 rounded-lg transition-colors"
+				class="w-full rounded-lg bg-green-600 py-3 font-bold text-white transition-colors hover:bg-green-500 disabled:bg-green-700 disabled:text-green-500"
 			>
 				{isJoining ? 'Bezig...' : 'Deelnemen'}
 			</button>
@@ -81,12 +79,9 @@
 
 		<!-- Error message -->
 		{#if lobbyStore.error}
-			<div class="mt-4 bg-red-500/20 border border-red-500 rounded-lg p-3 text-red-200 text-center">
+			<div class="mt-4 rounded-lg border border-red-500 bg-red-500/20 p-3 text-center text-red-200">
 				{lobbyStore.error}
-				<button
-					onclick={() => lobbyStore.clearError()}
-					class="ml-2 text-red-300 hover:text-white"
-				>
+				<button onclick={() => lobbyStore.clearError()} class="ml-2 text-red-300 hover:text-white">
 					&times;
 				</button>
 			</div>
@@ -94,13 +89,9 @@
 
 		<!-- Connection status -->
 		{#if lobbyStore.connectionState === 'connecting'}
-			<div class="mt-4 text-green-400 text-center text-sm">
-				Verbinding maken...
-			</div>
+			<div class="mt-4 text-center text-sm text-green-400">Verbinding maken...</div>
 		{:else if lobbyStore.connectionState === 'reconnecting'}
-			<div class="mt-4 text-green-400 text-center text-sm">
-				Opnieuw verbinden...
-			</div>
+			<div class="mt-4 text-center text-sm text-green-400">Opnieuw verbinden...</div>
 		{/if}
 	</div>
 </div>

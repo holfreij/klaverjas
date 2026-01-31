@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
 	type Card,
-	type Suit,
-	type Rank,
 	SUITS,
 	RANKS,
 	createDeck,

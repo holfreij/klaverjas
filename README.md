@@ -19,13 +19,13 @@ npm run dev
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
+| Command           | Description              |
+| ----------------- | ------------------------ |
+| `npm run dev`     | Start development server |
+| `npm run build`   | Build for production     |
 | `npm run preview` | Preview production build |
-| `npm run test` | Run unit tests |
-| `npm run check` | TypeScript type checking |
+| `npm run test`    | Run unit tests           |
+| `npm run check`   | TypeScript type checking |
 
 ## Tech Stack
 

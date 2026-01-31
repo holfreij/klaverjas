@@ -2,8 +2,6 @@
 	import { lobbyStore } from '$lib/stores/lobbyStore.svelte';
 	import { SEAT_NAMES, type PlayerSeat, type Seat } from '$lib/multiplayer/types';
 
-	const seats: PlayerSeat[] = [0, 1, 2, 3];
-
 	function handleSeatClick(seat: Seat) {
 		lobbyStore.switchSeat(seat);
 	}
@@ -24,41 +22,43 @@
 </script>
 
 <div class="min-h-screen bg-green-900 p-4">
-	<div class="max-w-2xl mx-auto">
+	<div class="mx-auto max-w-2xl">
 		<!-- Header with lobby code -->
-		<div class="bg-green-800 rounded-lg p-4 mb-6 text-center">
-			<p class="text-green-300 text-sm mb-1">Lobby code</p>
+		<div class="mb-6 rounded-lg bg-green-800 p-4 text-center">
+			<p class="mb-1 text-sm text-green-300">Lobby code</p>
 			<button
 				onclick={copyLobbyCode}
-				class="text-3xl font-mono font-bold text-white tracking-widest hover:text-green-200 transition-colors"
+				class="font-mono text-3xl font-bold tracking-widest text-white transition-colors hover:text-green-200"
 				title="Klik om te kopieren"
 			>
 				{lobbyStore.lobby?.code}
 			</button>
-			<p class="text-green-400 text-xs mt-1">Klik om te kopieren</p>
+			<p class="mt-1 text-xs text-green-400">Klik om te kopieren</p>
 		</div>
 
 		<!-- Card table with seats -->
-		<div class="relative bg-green-700 rounded-xl p-8 aspect-square max-w-md mx-auto shadow-xl border-4 border-green-600">
+		<div
+			class="relative mx-auto aspect-square max-w-md rounded-xl border-4 border-green-600 bg-green-700 p-8 shadow-xl"
+		>
 			<!-- Center info -->
 			<div class="absolute inset-0 flex items-center justify-center">
 				<div class="text-center">
 					{#if lobbyStore.lobby?.status === 'playing'}
-						<p class="text-yellow-400 font-bold">Spel gestart!</p>
-						<p class="text-green-300 text-xs mt-1">Game UI komt binnenkort...</p>
+						<p class="font-bold text-yellow-400">Spel gestart!</p>
+						<p class="mt-1 text-xs text-green-300">Game UI komt binnenkort...</p>
 					{:else}
-						<p class="text-green-300 text-sm">{lobbyStore.playerCount}/4 spelers</p>
+						<p class="text-sm text-green-300">{lobbyStore.playerCount}/4 spelers</p>
 						{#if lobbyStore.canStart && lobbyStore.isHost}
 							<button
 								onclick={handleStart}
-								class="mt-2 bg-yellow-500 hover:bg-yellow-400 text-green-900 font-bold px-6 py-2 rounded-lg transition-colors"
+								class="mt-2 rounded-lg bg-yellow-500 px-6 py-2 font-bold text-green-900 transition-colors hover:bg-yellow-400"
 							>
 								Start spel
 							</button>
 						{:else if !lobbyStore.canStart}
-							<p class="text-green-400 text-xs mt-2">Wacht op meer spelers...</p>
+							<p class="mt-2 text-xs text-green-400">Wacht op meer spelers...</p>
 						{:else if !lobbyStore.isHost}
-							<p class="text-green-400 text-xs mt-2">Wacht op host om te starten</p>
+							<p class="mt-2 text-xs text-green-400">Wacht op host om te starten</p>
 						{/if}
 					{/if}
 				</div>
@@ -71,7 +71,7 @@
 			</div>
 
 			<!-- West (left) - seat 1 -->
-			<div class="absolute left-2 top-1/2 -translate-y-1/2">
+			<div class="absolute top-1/2 left-2 -translate-y-1/2">
 				{@render seatButton(1)}
 			</div>
 
@@ -81,7 +81,7 @@
 			</div>
 
 			<!-- Oost (right) - seat 3 -->
-			<div class="absolute right-2 top-1/2 -translate-y-1/2">
+			<div class="absolute top-1/2 right-2 -translate-y-1/2">
 				{@render seatButton(3)}
 			</div>
 		</div>
@@ -93,22 +93,16 @@
 
 		<!-- Leave button -->
 		<div class="mt-6 text-center">
-			<button
-				onclick={handleLeave}
-				class="text-green-400 hover:text-green-200 underline text-sm"
-			>
+			<button onclick={handleLeave} class="text-sm text-green-400 underline hover:text-green-200">
 				Verlaat lobby
 			</button>
 		</div>
 
 		<!-- Error message -->
 		{#if lobbyStore.error}
-			<div class="mt-4 bg-red-500/20 border border-red-500 rounded-lg p-3 text-red-200 text-center">
+			<div class="mt-4 rounded-lg border border-red-500 bg-red-500/20 p-3 text-center text-red-200">
 				{lobbyStore.error}
-				<button
-					onclick={() => lobbyStore.clearError()}
-					class="ml-2 text-red-300 hover:text-white"
-				>
+				<button onclick={() => lobbyStore.clearError()} class="ml-2 text-red-300 hover:text-white">
 					&times;
 				</button>
 			</div>
@@ -123,16 +117,16 @@
 
 	<button
 		onclick={() => handleSeatClick(seat)}
-		class="w-24 h-20 rounded-lg flex flex-col items-center justify-center transition-all
+		class="flex h-20 w-24 flex-col items-center justify-center rounded-lg transition-all
 			{playerAtSeat
-				? isCurrentPlayer
-					? 'bg-yellow-500 text-green-900'
-					: 'bg-green-600 text-white hover:bg-green-500'
-				: 'bg-green-800 text-green-400 hover:bg-green-600 border-2 border-dashed border-green-600'}"
+			? isCurrentPlayer
+				? 'bg-yellow-500 text-green-900'
+				: 'bg-green-600 text-white hover:bg-green-500'
+			: 'border-2 border-dashed border-green-600 bg-green-800 text-green-400 hover:bg-green-600'}"
 	>
 		<span class="text-xs font-medium opacity-75">{SEAT_NAMES[seat]}</span>
 		{#if playerAtSeat}
-			<span class="font-bold text-sm truncate max-w-20 px-1">
+			<span class="max-w-20 truncate px-1 text-sm font-bold">
 				{playerAtSeat.player.name}
 			</span>
 			{#if isHost}
@@ -150,16 +144,16 @@
 
 	<button
 		onclick={() => handleSeatClick('table')}
-		class="px-4 py-2 rounded-lg text-sm transition-all
+		class="rounded-lg px-4 py-2 text-sm transition-all
 			{tablePlayer
-				? isCurrentPlayer
-					? 'bg-yellow-500 text-green-900'
-					: 'bg-green-700 text-white'
-				: 'bg-green-800 text-green-400 hover:bg-green-700 border border-dashed border-green-600'}"
+			? isCurrentPlayer
+				? 'bg-yellow-500 text-green-900'
+				: 'bg-green-700 text-white'
+			: 'border border-dashed border-green-600 bg-green-800 text-green-400 hover:bg-green-700'}"
 	>
 		Tafel
 		{#if tablePlayer}
-			<span class="font-bold ml-1">{tablePlayer.player.name}</span>
+			<span class="ml-1 font-bold">{tablePlayer.player.name}</span>
 		{/if}
 	</button>
 {/snippet}

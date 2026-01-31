@@ -163,9 +163,7 @@ export async function joinLobby(
 		}
 
 		// Find available seat
-		const occupiedSeats = new Set(
-			Object.values(lobby.players || {}).map((p) => p.seat)
-		);
+		const occupiedSeats = new Set(Object.values(lobby.players || {}).map((p) => p.seat));
 
 		let seat: Seat;
 		if (preferredSeat !== undefined && !occupiedSeats.has(preferredSeat)) {
@@ -174,9 +172,7 @@ export async function joinLobby(
 			return { success: false, error: 'Tafel positie is al bezet' };
 		} else {
 			// Find first available player seat
-			const availableSeats = ([0, 1, 2, 3] as PlayerSeat[]).filter(
-				(s) => !occupiedSeats.has(s)
-			);
+			const availableSeats = ([0, 1, 2, 3] as PlayerSeat[]).filter((s) => !occupiedSeats.has(s));
 			if (availableSeats.length === 0) {
 				// Try table position if no player seats available
 				if (!occupiedSeats.has('table')) {

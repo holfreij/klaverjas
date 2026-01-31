@@ -108,11 +108,11 @@ The table device needs to know which physical seat corresponds to which game sea
 
 ### Screen Sizes
 
-| Device | Resolution | Considerations |
-|--------|------------|----------------|
-| iPad | 1024x768 | Primary target |
-| Android tablet | 800x1280 | Portrait mode |
-| Laptop | 1366x768+ | May be at angle, keep text large |
+| Device         | Resolution | Considerations                   |
+| -------------- | ---------- | -------------------------------- |
+| iPad           | 1024x768   | Primary target                   |
+| Android tablet | 800x1280   | Portrait mode                    |
+| Laptop         | 1366x768+  | May be at angle, keep text large |
 
 ## Visual Design
 

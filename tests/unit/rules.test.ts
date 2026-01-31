@@ -61,12 +61,7 @@ describe('getCardStrength', () => {
 describe('getLegalMoves', () => {
 	describe('first card of trick', () => {
 		it('should allow any card when leading', () => {
-			const hand: Card[] = [
-				card('♠', 'A'),
-				card('♥', 'K'),
-				card('♣', 'Q'),
-				card('♦', 'J')
-			];
+			const hand: Card[] = [card('♠', 'A'), card('♥', 'K'), card('♣', 'Q'), card('♦', 'J')];
 			const legal = getLegalMoves(hand, [], '♠');
 			expect(legal).toEqual(hand);
 		});
@@ -74,24 +69,14 @@ describe('getLegalMoves', () => {
 
 	describe('following suit', () => {
 		it('should only allow cards of led suit when player has them', () => {
-			const hand: Card[] = [
-				card('♠', 'A'),
-				card('♠', 'K'),
-				card('♥', 'Q'),
-				card('♦', 'J')
-			];
+			const hand: Card[] = [card('♠', 'A'), card('♠', 'K'), card('♥', 'Q'), card('♦', 'J')];
 			const trick: Card[] = [card('♠', '10')];
 			const legal = getLegalMoves(hand, trick, '♥');
 			expect(legal).toEqual([card('♠', 'A'), card('♠', 'K')]);
 		});
 
 		it('should allow single card when only one of led suit', () => {
-			const hand: Card[] = [
-				card('♠', '7'),
-				card('♥', 'Q'),
-				card('♣', 'J'),
-				card('♦', '9')
-			];
+			const hand: Card[] = [card('♠', '7'), card('♥', 'Q'), card('♣', 'J'), card('♦', '9')];
 			const trick: Card[] = [card('♠', 'A')];
 			const legal = getLegalMoves(hand, trick, '♥');
 			expect(legal).toEqual([card('♠', '7')]);
@@ -100,23 +85,14 @@ describe('getLegalMoves', () => {
 
 	describe('must trump when cannot follow suit', () => {
 		it('should require trumping when no led suit and no trump in trick', () => {
-			const hand: Card[] = [
-				card('♥', 'A'),
-				card('♥', 'K'),
-				card('♣', 'Q'),
-				card('♦', 'J')
-			];
+			const hand: Card[] = [card('♥', 'A'), card('♥', 'K'), card('♣', 'Q'), card('♦', 'J')];
 			const trick: Card[] = [card('♠', '10')];
 			const legal = getLegalMoves(hand, trick, '♥');
 			expect(legal).toEqual([card('♥', 'A'), card('♥', 'K')]);
 		});
 
 		it('should require trumping even if partner is winning (Rotterdam rule)', () => {
-			const hand: Card[] = [
-				card('♥', '7'),
-				card('♣', 'Q'),
-				card('♦', 'J')
-			];
+			const hand: Card[] = [card('♥', '7'), card('♣', 'Q'), card('♦', 'J')];
 			// Partner (2 cards ago) played highest card, but still must trump
 			const trick: Card[] = [card('♠', 'A'), card('♠', '7')];
 			const legal = getLegalMoves(hand, trick, '♥');
@@ -126,12 +102,7 @@ describe('getLegalMoves', () => {
 
 	describe('over-trumping', () => {
 		it('should require over-trump when trump in trick and has higher trump', () => {
-			const hand: Card[] = [
-				card('♥', 'J'),
-				card('♥', '9'),
-				card('♥', '7'),
-				card('♣', 'A')
-			];
+			const hand: Card[] = [card('♥', 'J'), card('♥', '9'), card('♥', '7'), card('♣', 'A')];
 			const trick: Card[] = [card('♠', '10'), card('♥', 'K')]; // ♥K is trump
 			const legal = getLegalMoves(hand, trick, '♥');
 			// Must play J or 9 (both beat K)
@@ -139,11 +110,7 @@ describe('getLegalMoves', () => {
 		});
 
 		it('should require over-trump when multiple trumps in trick', () => {
-			const hand: Card[] = [
-				card('♥', 'J'),
-				card('♥', '8'),
-				card('♣', 'A')
-			];
+			const hand: Card[] = [card('♥', 'J'), card('♥', '8'), card('♣', 'A')];
 			// Two trumps played, highest is 9
 			const trick: Card[] = [card('♠', '10'), card('♥', '7'), card('♥', '9')];
 			const legal = getLegalMoves(hand, trick, '♥');
@@ -154,11 +121,7 @@ describe('getLegalMoves', () => {
 
 	describe('under-trumping', () => {
 		it('should allow under-trump when cannot over-trump but has trump', () => {
-			const hand: Card[] = [
-				card('♥', '8'),
-				card('♥', '7'),
-				card('♣', 'A')
-			];
+			const hand: Card[] = [card('♥', '8'), card('♥', '7'), card('♣', 'A')];
 			const trick: Card[] = [card('♠', '10'), card('♥', 'J')]; // ♥J is highest trump
 			const legal = getLegalMoves(hand, trick, '♥');
 			// Must under-trump (can't beat J, but has trump)
@@ -168,12 +131,7 @@ describe('getLegalMoves', () => {
 
 	describe('no trump available', () => {
 		it('should allow any card when cannot follow suit and has no trump', () => {
-			const hand: Card[] = [
-				card('♣', 'A'),
-				card('♣', 'K'),
-				card('♦', 'Q'),
-				card('♦', 'J')
-			];
+			const hand: Card[] = [card('♣', 'A'), card('♣', 'K'), card('♦', 'Q'), card('♦', 'J')];
 			const trick: Card[] = [card('♠', '10')];
 			const legal = getLegalMoves(hand, trick, '♥');
 			expect(legal).toEqual(hand);
@@ -182,12 +140,7 @@ describe('getLegalMoves', () => {
 
 	describe('leading trump suit', () => {
 		it('should allow following trump when trump was led', () => {
-			const hand: Card[] = [
-				card('♥', 'J'),
-				card('♥', '8'),
-				card('♠', 'A'),
-				card('♦', 'K')
-			];
+			const hand: Card[] = [card('♥', 'J'), card('♥', '8'), card('♠', 'A'), card('♦', 'K')];
 			const trick: Card[] = [card('♥', 'A')]; // Trump led
 			const legal = getLegalMoves(hand, trick, '♥');
 			// Must follow trump suit
@@ -213,12 +166,7 @@ describe('isLegalMove', () => {
 
 describe('determineTrickWinner', () => {
 	it('should return winner when no trump played - highest of led suit wins', () => {
-		const trick: Card[] = [
-			card('♠', '10'),
-			card('♠', 'A'),
-			card('♠', 'K'),
-			card('♠', '7')
-		];
+		const trick: Card[] = [card('♠', '10'), card('♠', 'A'), card('♠', 'K'), card('♠', '7')];
 		// A is highest, played at index 1
 		expect(determineTrickWinner(trick, '♥')).toBe(1);
 	});
@@ -289,11 +237,7 @@ describe('checkAllMovesInRound', () => {
 	type Position = 'south' | 'west' | 'north' | 'east';
 	type Hand = Card[];
 
-	const createMove = (
-		player: Position,
-		cardPlayed: Card,
-		trickNumber: number
-	): PlayedMove => ({
+	const createMove = (player: Position, cardPlayed: Card, trickNumber: number): PlayedMove => ({
 		player,
 		card: cardPlayed,
 		trickNumber

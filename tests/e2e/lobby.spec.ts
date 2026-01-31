@@ -334,7 +334,9 @@ test.describe('Lobby System E2E', () => {
 
 			// Wait for host transfer - SecondPlayer should now be host
 			await expect(
-				playerPage.locator('button:has-text("SecondPlayer")').locator('span.text-xs:has-text("Host")')
+				playerPage
+					.locator('button:has-text("SecondPlayer")')
+					.locator('span.text-xs:has-text("Host")')
 			).toBeVisible({ timeout: 5000 });
 
 			await hostContext.close();

@@ -6,26 +6,26 @@ An online multiplayer Klaverjas card game (Rotterdam rules) as a PWA, deployed o
 
 ## Tech Stack
 
-| Layer | Technology | Rationale |
-|-------|------------|-----------|
-| Framework | SvelteKit | Small bundles, great reactivity for real-time state, excellent static adapter |
-| Language | TypeScript | Type safety for complex game logic |
-| Styling | Tailwind CSS v4 | Rapid UI development, mobile-first utilities |
-| Real-time | Firebase Realtime Database | Free tier, easy setup, reliable sync |
-| Build | Vite (via SvelteKit) | Fast builds, excellent PWA plugins |
-| PWA | vite-plugin-pwa | Service workers, manifest, install prompts |
-| Testing | Vitest + Playwright | Unit tests for game logic, E2E for flows |
-| CI/CD | GitHub Actions | Auto-deploy to GitHub Pages on push |
+| Layer     | Technology                 | Rationale                                                                     |
+| --------- | -------------------------- | ----------------------------------------------------------------------------- |
+| Framework | SvelteKit                  | Small bundles, great reactivity for real-time state, excellent static adapter |
+| Language  | TypeScript                 | Type safety for complex game logic                                            |
+| Styling   | Tailwind CSS v4            | Rapid UI development, mobile-first utilities                                  |
+| Real-time | Firebase Realtime Database | Free tier, easy setup, reliable sync                                          |
+| Build     | Vite (via SvelteKit)       | Fast builds, excellent PWA plugins                                            |
+| PWA       | vite-plugin-pwa            | Service workers, manifest, install prompts                                    |
+| Testing   | Vitest + Playwright        | Unit tests for game logic, E2E for flows                                      |
+| CI/CD     | GitHub Actions             | Auto-deploy to GitHub Pages on push                                           |
 
 ## Documentation Structure
 
-| Document | Purpose |
-|----------|---------|
-| `CLAUDE.md` | Project constitution for AI - rules, conventions, quick reference |
-| `IMPLEMENTATION_PLAN.md` | Living document - current stage tasks, detailed progress |
-| `plans/roadmap.md` | Stable reference - vision, all stages overview, architecture |
-| `DECISIONS.md` | Decision log - choices made during development |
-| `specs/*.md` | Requirements - detailed feature specifications |
+| Document                 | Purpose                                                           |
+| ------------------------ | ----------------------------------------------------------------- |
+| `CLAUDE.md`              | Project constitution for AI - rules, conventions, quick reference |
+| `IMPLEMENTATION_PLAN.md` | Living document - current stage tasks, detailed progress          |
+| `plans/roadmap.md`       | Stable reference - vision, all stages overview, architecture      |
+| `DECISIONS.md`           | Decision log - choices made during development                    |
+| `specs/*.md`             | Requirements - detailed feature specifications                    |
 
 ## Project Structure
 
@@ -67,6 +67,7 @@ klaverjas/
 ## Development Stages
 
 ### Stage 1: Foundation ✓
+
 **Goal:** Deployable skeleton with CI/CD
 
 - [x] Initialize SvelteKit project with TypeScript
@@ -82,6 +83,7 @@ klaverjas/
 ---
 
 ### Stage 2: Core Game Logic ✓
+
 **Goal:** Complete, tested Klaverjas rules engine (TDD rebuild)
 
 - [x] Card and Deck types/utilities
@@ -102,6 +104,7 @@ klaverjas/
 ---
 
 ### Stage 3: Lobby System ✓
+
 **Goal:** Create/join lobby, seat assignment, Firebase sync
 
 - [x] Firebase Realtime Database schema implementation
@@ -120,6 +123,7 @@ klaverjas/
 ---
 
 ### Stage 4: Multiplayer Gameplay
+
 **Goal:** Cards, turns, scoring, verzaakt, disconnection handling
 
 - [ ] Card component (visual representation)
@@ -144,6 +148,7 @@ klaverjas/
 ---
 
 ### Stage 5: Table Device
+
 **Goal:** Central display for local play
 
 - [ ] Table device role in lobby
@@ -163,6 +168,7 @@ klaverjas/
 ---
 
 ### Stage 6: Polish & PWA
+
 **Goal:** Production-ready PWA
 
 - [ ] Install prompt handling
@@ -214,28 +220,31 @@ klaverjas/
 
 ### Design Decisions (Confirmed)
 
-| Decision | Choice | Notes |
-|----------|--------|-------|
-| Card assets | Open-source SVG | Use svg-cards or similar library |
-| Roem system | Manual claim | Players must spot and announce roem - adds skill |
-| Turn timers | None | Casual, relaxed play |
-| Sound effects | Defer | Can add later if desired |
+| Decision      | Choice          | Notes                                            |
+| ------------- | --------------- | ------------------------------------------------ |
+| Card assets   | Open-source SVG | Use svg-cards or similar library                 |
+| Roem system   | Manual claim    | Players must spot and announce roem - adds skill |
+| Turn timers   | None            | Casual, relaxed play                             |
+| Sound effects | Defer           | Can add later if desired                         |
 
 ---
 
 ## Testing Strategy
 
 ### Unit Tests (Vitest)
+
 - All game logic: deck, rules, scoring, roem
 - Pure functions, easy to test
 - Run on every commit via CI
 
 ### Component Tests (Vitest + Testing Library)
+
 - Card rendering
 - Hand interaction
 - Score display
 
 ### E2E Tests (Playwright) ✓
+
 - [x] Lobby flow (create, join, seat selection, start)
 - [ ] Full game flow
 - [ ] Multiplayer scenarios (multiple browser contexts)
@@ -246,23 +255,28 @@ klaverjas/
 ## AI-Assisted Development Strategy
 
 ### Spec-First Development
+
 Before implementing a feature, write/review the relevant spec file in `specs/`. This gives full context for implementation.
 
 ### TDD Loop
+
 1. Write failing test
 2. Implement to pass
 3. Run test (backpressure)
 4. Refine until passing
 
 ### Incremental Commits
+
 Each completed task = commit. Maintains working state.
 
 ### Plan-Driven Work
+
 - `IMPLEMENTATION_PLAN.md` tracks current stage tasks
 - Update as tasks complete
 - Clear priorities for AI assistance
 
 ### Per-Stage Workflow
+
 1. Review stage goals
 2. Create detailed implementation plan
 3. Write/update relevant spec files

@@ -38,7 +38,7 @@ async function cleanupLobby(code: string) {
 		const db = getFirebaseDatabase();
 		const lobbyRef = ref(db, `lobbies/${code}`);
 		await remove(lobbyRef);
-	} catch (error) {
+	} catch {
 		// Ignore errors during cleanup
 	}
 }

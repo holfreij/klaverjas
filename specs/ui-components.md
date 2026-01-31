@@ -26,11 +26,11 @@ Mobile-first design using Tailwind CSS. Components built with Svelte 5 runes.
 
 ```typescript
 interface CardProps {
-  card: Card;
-  faceUp?: boolean;      // default: true
-  selected?: boolean;
-  disabled?: boolean;
-  onClick?: () => void;
+	card: Card;
+	faceUp?: boolean; // default: true
+	selected?: boolean;
+	disabled?: boolean;
+	onClick?: () => void;
 }
 ```
 
@@ -56,10 +56,10 @@ interface CardProps {
 
 ```typescript
 interface HandProps {
-  cards: Card[];
-  trump: Suit;
-  onCardPlay: (card: Card) => void;
-  disabled?: boolean;
+	cards: Card[];
+	trump: Suit;
+	onCardPlay: (card: Card) => void;
+	disabled?: boolean;
 }
 ```
 
@@ -76,16 +76,17 @@ interface HandProps {
 ### Position Consistency
 
 Positions must correspond to real-world physical seating:
+
 - Your cards always at bottom
 - Partner always at top
 - Opponents at left and right based on table position
 
 ### Buttons
 
-| Button | Dutch Label | Position | State |
-|--------|-------------|----------|-------|
-| Roem | "Roem" | Near hand | Disabled until a card is played, then enabled. Disabled after successful claim until next trick |
-| Verzaakt | "Verzaakt" | Near hand | Disabled until a card is played, then enabled |
+| Button   | Dutch Label | Position  | State                                                                                           |
+| -------- | ----------- | --------- | ----------------------------------------------------------------------------------------------- |
+| Roem     | "Roem"      | Near hand | Disabled until a card is played, then enabled. Disabled after successful claim until next trick |
+| Verzaakt | "Verzaakt"  | Near hand | Disabled until a card is played, then enabled                                                   |
 
 ## Trump Indicator
 
