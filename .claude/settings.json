@@ -1,45 +1,45 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(npm:*)",
-      "Bash(npx:*)",
-      "Bash(git:*)",
-      "Bash(gh:*)",
-      "Bash(mkdir:*)",
-      "Bash(ls:*)",
-      "Bash(cat:*)",
-      "Bash(echo:*)",
-      "Bash(sleep:*)",
-      "Bash(which:*)",
-      "Read",
-      "Edit",
-      "Write",
-      "Glob",
-      "Grep",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:api.github.com)",
-      "WebFetch(domain:npmjs.com)",
-      "WebFetch(domain:svelte.dev)",
-      "WebFetch(domain:firebase.google.com)",
-      "WebFetch(domain:klaverjas.nl)"
-    ],
-    "deny": [
-      "Bash(rm -rf /*)",
-      "Bash(sudo:*)",
-      "Bash(curl:*)",
-      "Bash(wget:*)",
-      "Bash(dd:*)",
-      "Read(/etc/**)",
-      "Read(~/.ssh/**)",
-      "Read(~/.aws/**)",
-      "Read(~/.gnupg/**)",
-      "Read(/mnt/c/**)",
-      "Read(/mnt/d/**)",
-      "Edit(/mnt/c/**)",
-      "Edit(/mnt/d/**)",
-      "Write(/mnt/c/**)",
-      "Write(/mnt/d/**)"
-    ],
-    "defaultMode": "acceptEdits"
-  }
+	"permissions": {
+		"allow": [
+			"Bash(npm:*)",
+			"Bash(npx:*)",
+			"Bash(git:*)",
+			"Bash(gh:*)",
+			"Bash(mkdir:*)",
+			"Bash(ls:*)",
+			"Bash(cat:*)",
+			"Bash(echo:*)",
+			"Bash(sleep:*)",
+			"Bash(which:*)",
+			"Read",
+			"Edit",
+			"Write",
+			"Glob",
+			"Grep",
+			"WebFetch(domain:github.com)",
+			"WebFetch(domain:api.github.com)",
+			"WebFetch(domain:npmjs.com)",
+			"WebFetch(domain:svelte.dev)",
+			"WebFetch(domain:firebase.google.com)",
+			"WebFetch(domain:klaverjas.nl)"
+		],
+		"deny": [
+			"Bash(rm -rf /*)",
+			"Bash(sudo:*)",
+			"Bash(curl:*)",
+			"Bash(wget:*)",
+			"Bash(dd:*)",
+			"Read(/etc/**)",
+			"Read(~/.ssh/**)",
+			"Read(~/.aws/**)",
+			"Read(~/.gnupg/**)",
+			"Read(/mnt/c/**)",
+			"Read(/mnt/d/**)",
+			"Edit(/mnt/c/**)",
+			"Edit(/mnt/d/**)",
+			"Write(/mnt/c/**)",
+			"Write(/mnt/d/**)"
+		],
+		"defaultMode": "acceptEdits"
+	}
 }
