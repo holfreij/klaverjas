@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Current stage: **Stage 4 - Game UI** (next)
+Current stage: **Stage 4A - Card Visuals**
 
 See [plans/roadmap.md](plans/roadmap.md) for the full project roadmap.
 
@@ -119,6 +119,69 @@ See [specs/multiplayer.md](specs/multiplayer.md) for lobby specifications.
 
 ---
 
-## Stage 4 - Game UI
+## Stage 4 - Multiplayer Gameplay
 
-Coming next...
+### Stage 4A - Card Visuals - COMPLETED
+
+Card rendering: Simple CSS-based cards with suit symbols (can upgrade to CardMeister SVGs later)
+
+- [x] **Card component** (`src/lib/components/Card.svelte`)
+  - CSS-based card rendering with suit symbols
+  - Props: card, faceUp, selected, disabled, onClick
+  - Red/black suit colors, accessible labels in Dutch
+  - 23 tests passing
+- [x] **Hand component** (`src/lib/components/Hand.svelte`)
+  - Horizontal layout with cards
+  - Sorted by suit (♠-♥-♣-♦), then rank (trump/non-trump order)
+  - Single tap plays card (no confirmation)
+  - Props: cards, trump, onCardPlay, disabled
+  - 12 tests passing
+- [ ] **Visual polish** - Better card design, sizing for mobile (deferred to 4F)
+
+### Stage 4B - Game Layout - COMPLETED
+
+- [x] **Positions helper** (`src/lib/game/positions.ts`) - relative positions from any seat (20 tests)
+- [x] **GameTable component** (`src/lib/components/GameTable.svelte`) - main game view layout (25 tests)
+- [x] **Player positions** - partner top, opponents left/right, you bottom
+- [x] **TrickArea** - cards played this trick (center), positioned by player
+- [x] **Trump indicator** - top-right corner with suit symbol
+- [x] **Turn indicator** - glowing border on active player
+- [x] **Score header** - both team scores, round number
+- [x] **Table device awareness** - boolean flag, hide trick area if table joined
+- [x] **OrientationCheck component** - show rotate instruction if portrait
+- [x] **Roem/Verzaakt buttons** - near hand, enable/disable logic (stubs for 4D)
+
+### Stage 4C - Game State Sync (next)
+
+- [ ] **Firebase game state schema** - extend lobby with game state
+- [ ] **Trump selection phase** - first player chooses trump (mandatory)
+- [ ] **Card playing** - sync played cards to Firebase
+- [ ] **Trick completion** - detect 4 cards, determine winner, award points
+- [ ] **Round progression** - 8 tricks per round, calculate scores
+- [ ] **Private hand view** - only show player's own cards
+
+### Stage 4D - Roem & Verzaakt
+
+- [ ] **Roem button** - enabled after card played, disabled after claim
+- [ ] **Roem claim modal** - point value selection (20/40/50/70/100)
+- [ ] **Roem validation** - system verifies, show success/error
+- [ ] **Verzaakt button** - enabled after card played
+- [ ] **Verzaakt accusation** - player selection modal
+- [ ] **Verzaakt verification** - check all moves in round, end round if illegal found
+
+### Stage 4E - Round/Game Flow
+
+- [ ] **Round end display** - scores for 5 seconds, skip mechanism
+- [ ] **Nat/pit display** - special handling for nat and pit
+- [ ] **Game end display** - round-by-round breakdown, winner announcement
+- [ ] **Disconnection handling** - waiting overlay, timeout
+- [ ] **Rematch functionality** - "Opnieuw spelen" button
+
+### Stage 4F - Polish
+
+- [ ] **Card play animation** - slide from player to center (~500ms)
+- [ ] **Trick collection animation** - cards slide to winner (~500ms)
+- [ ] **Trick timing delay** - 1-2 seconds after 4th card
+- [ ] **Roem claim animation** - highlight cards, sound effect
+- [ ] **Loading states** - spinners, skeleton screens
+- [ ] **Error states** - connection errors, validation errors

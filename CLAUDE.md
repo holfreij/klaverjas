@@ -78,6 +78,45 @@ tests/
 - Prefer explicit types over inference for public APIs
 - Keep components small and focused
 
+## Visual UI Inspection (MANDATORY for UI work)
+
+When developing or modifying UI components, **always perform visual inspection** using Playwright screenshots. Do not rely on the user to provide screenshots.
+
+### How to Take Screenshots
+
+```javascript
+// Run this with: node -e "<code>"
+const { chromium } = require('playwright');
+(async () => {
+	const browser = await chromium.launch();
+	// Desktop: { width: 1280, height: 720 }
+	// Mobile landscape: { width: 932, height: 430 }
+	const page = await browser.newPage({ viewport: { width: 932, height: 430 } });
+	await page.goto('http://127.0.0.1:5173/demo');
+	await page.waitForTimeout(1000);
+	// Interact with page if needed (click buttons, etc.)
+	await page.screenshot({ path: '/tmp/screenshot.png' });
+	await browser.close();
+})();
+```
+
+Then read the screenshot with the Read tool: `/tmp/screenshot.png`
+
+### When to Use Visual Inspection
+
+- After creating or modifying any UI component
+- When adjusting layouts, spacing, or responsive design
+- When the user reports a visual issue
+- Before marking any UI-related task as complete
+
+### What to Check
+
+- Elements don't overlap unexpectedly
+- Text is readable (not too small, not cut off)
+- Layout works on both desktop and mobile landscape viewports
+- Colors and contrast are correct
+- All expected elements are visible
+
 ## Game Rules Summary (Rotterdam)
 
 - 4 players, 2 teams (North-South vs West-East)
