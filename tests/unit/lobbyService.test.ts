@@ -278,7 +278,7 @@ describe('lobbyService unit tests', () => {
 			const callback = vi.fn();
 			const lobby = createLobby('123456', 'p1', { p1: createPlayer('Host', 0) });
 
-			(onValue as Mock).mockImplementation((ref, cb) => {
+			(onValue as Mock).mockImplementation((_ref, cb) => {
 				cb({
 					exists: () => true,
 					val: () => lobby
@@ -294,7 +294,7 @@ describe('lobbyService unit tests', () => {
 		it('should call callback with null when snapshot does not exist', () => {
 			const callback = vi.fn();
 
-			(onValue as Mock).mockImplementation((ref, cb) => {
+			(onValue as Mock).mockImplementation((_ref, cb) => {
 				cb({
 					exists: () => false
 				});
@@ -309,6 +309,10 @@ describe('lobbyService unit tests', () => {
 
 	describe('updatePlayerStatus', () => {
 		it('should update player with connected status and serverTimestamp', async () => {
+			// Mock get() to indicate player exists
+			(get as Mock).mockResolvedValue({
+				exists: () => true
+			});
 			(update as Mock).mockResolvedValue(undefined);
 
 			await updatePlayerStatus('123456', 'p1', true);
@@ -320,6 +324,10 @@ describe('lobbyService unit tests', () => {
 		});
 
 		it('should set connected to false when disconnecting', async () => {
+			// Mock get() to indicate player exists
+			(get as Mock).mockResolvedValue({
+				exists: () => true
+			});
 			(update as Mock).mockResolvedValue(undefined);
 
 			await updatePlayerStatus('123456', 'p1', false);
@@ -330,8 +338,20 @@ describe('lobbyService unit tests', () => {
 			});
 		});
 
+		it('should not update when player does not exist', async () => {
+			// Mock get() to indicate player does not exist
+			(get as Mock).mockResolvedValue({
+				exists: () => false
+			});
+
+			await updatePlayerStatus('123456', 'nonexistent', true);
+
+			// update should NOT be called when player doesn't exist
+			expect(update).not.toHaveBeenCalled();
+		});
+
 		it('should not throw on Firebase error', async () => {
-			(update as Mock).mockRejectedValue(new Error('Firebase error'));
+			(get as Mock).mockRejectedValue(new Error('Firebase error'));
 
 			// Should not throw
 			await expect(updatePlayerStatus('123456', 'p1', true)).resolves.not.toThrow();

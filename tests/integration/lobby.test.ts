@@ -49,9 +49,11 @@ async function cleanupLobby(code: string) {
 }
 
 describe('Firebase Lobby Integration Tests', () => {
-	beforeAll(() => {
+	beforeAll(async () => {
 		// Clear any existing session
 		clearSession();
+		// Clean up test lobby code that might exist from previous runs
+		await cleanupLobby('999999');
 	});
 
 	afterEach(async () => {
@@ -597,24 +599,23 @@ describe('Firebase Lobby Integration Tests', () => {
 			const createResult = await createLobby('Host');
 			createdLobbies.push(createResult.lobbyCode!);
 
-			let callCount = 0;
+			let deletionTriggered = false;
 
 			return new Promise<void>((resolve) => {
 				const unsubscribe = subscribeLobby(createResult.lobbyCode!, async (lobby) => {
-					callCount++;
-
-					if (callCount === 1) {
+					if (!deletionTriggered) {
 						// First callback - lobby exists
 						expect(lobby).not.toBe(null);
+						deletionTriggered = true;
 
 						// Delete the lobby (by having host leave)
 						await leaveLobby(createResult.lobbyCode!, createResult.playerId!);
-					} else if (callCount === 2) {
-						// Second callback - lobby deleted
-						expect(lobby).toBe(null);
+					} else if (lobby === null) {
+						// Lobby was deleted - may come after intermediate updates
 						unsubscribe();
 						resolve();
 					}
+					// Ignore intermediate callbacks (e.g., lobby with empty players)
 				});
 			});
 		});
