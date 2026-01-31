@@ -20,8 +20,8 @@ An online multiplayer Klaverjas card game (Rotterdam rules) as a PWA, deployed o
 | TypeScript | Type safety |
 | Tailwind CSS v4 | Styling (via @tailwindcss/vite) |
 | Firebase Realtime Database | Multiplayer sync |
-| Vitest | Unit testing |
-| Playwright | E2E testing (future) |
+| Vitest | Unit + integration testing |
+| Playwright | E2E testing |
 
 ## Commands
 
@@ -29,8 +29,9 @@ An online multiplayer Klaverjas card game (Rotterdam rules) as a PWA, deployed o
 npm run dev          # Development server
 npm run build        # Production build
 npm run preview      # Preview production build locally
-npm run test         # Run unit tests
+npm run test         # Run unit + integration tests (vitest)
 npm run test:watch   # Run tests in watch mode
+npm run test:e2e     # Run E2E tests (Playwright)
 npm run check        # TypeScript/Svelte type checking
 ```
 
@@ -53,7 +54,8 @@ src/
 specs/                  # Requirements documents
 tests/
 ├── unit/              # Vitest unit tests
-└── e2e/               # Playwright tests (future)
+├── integration/       # Vitest integration tests (Firebase)
+└── e2e/               # Playwright E2E tests
 ```
 
 ## Architecture Decisions

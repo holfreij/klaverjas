@@ -1,9 +1,17 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { lobbyStore } from '$lib/stores/lobbyStore.svelte';
+	import HomePage from '$lib/components/HomePage.svelte';
+	import LobbyRoom from '$lib/components/LobbyRoom.svelte';
+
+	onMount(async () => {
+		// Try to reconnect to previous session
+		await lobbyStore.tryReconnect();
+	});
 </script>
 
-<main class="min-h-screen bg-green-900 flex items-center justify-center">
-	<div class="text-center text-white">
-		<h1 class="text-4xl font-bold mb-4">Klaverjas</h1>
-		<p class="text-green-200">Coming soon...</p>
-	</div>
-</main>
+{#if lobbyStore.isInLobby}
+	<LobbyRoom />
+{:else}
+	<HomePage />
+{/if}

@@ -17,12 +17,23 @@ An online multiplayer Klaverjas card game (Rotterdam rules) as a PWA, deployed o
 | Testing | Vitest + Playwright | Unit tests for game logic, E2E for flows |
 | CI/CD | GitHub Actions | Auto-deploy to GitHub Pages on push |
 
+## Documentation Structure
+
+| Document | Purpose |
+|----------|---------|
+| `CLAUDE.md` | Project constitution for AI - rules, conventions, quick reference |
+| `IMPLEMENTATION_PLAN.md` | Living document - current stage tasks, detailed progress |
+| `plans/roadmap.md` | Stable reference - vision, all stages overview, architecture |
+| `DECISIONS.md` | Decision log - choices made during development |
+| `specs/*.md` | Requirements - detailed feature specifications |
+
 ## Project Structure
 
 ```
 klaverjas/
 ├── CLAUDE.md                    # Project constitution for AI assistance
 ├── IMPLEMENTATION_PLAN.md       # Living prioritized task list (current stage)
+├── DECISIONS.md                 # Design decisions log
 ├── plans/
 │   ├── roadmap.md              # This document (permanent reference)
 │   └── stage-N-*.md            # Stage-specific detailed plans
@@ -37,7 +48,8 @@ klaverjas/
 │   │   │   ├── deck.ts
 │   │   │   ├── rules.ts
 │   │   │   ├── scoring.ts
-│   │   │   └── roem.ts
+│   │   │   ├── roem.ts
+│   │   │   └── game.ts
 │   │   ├── multiplayer/        # Firebase integration
 │   │   ├── components/         # Svelte components
 │   │   └── stores/             # Svelte stores for state
@@ -45,7 +57,8 @@ klaverjas/
 │   └── app.css                 # Tailwind entry point
 ├── tests/
 │   ├── unit/                   # Vitest unit tests
-│   └── e2e/                    # Playwright tests (future)
+│   ├── integration/            # Vitest integration tests (Firebase)
+│   └── e2e/                    # Playwright E2E tests
 └── static/                     # PWA assets, card images
 ```
 
@@ -68,47 +81,41 @@ klaverjas/
 
 ---
 
-### Stage 2: Core Game Logic
+### Stage 2: Core Game Logic ✓
 **Goal:** Complete, tested Klaverjas rules engine (TDD rebuild)
 
-- [ ] Card and Deck types/utilities
-- [ ] Dealing mechanism (8 cards each)
-- [ ] Trump suit mechanics (Rotterdam rules)
-- [ ] Legal move validation (follow suit, must trump, etc.)
-- [ ] Verzaakt detection (check if any move in round was illegal)
-- [ ] Trick winner determination
-- [ ] Scoring system (card points + final trick bonus)
-- [ ] Roem detection logic (sequences, stuk, four-of-a-kind)
-- [ ] Roem claim validation (player claims, system verifies)
-- [ ] "Nat" logic (playing team fails OR verzaakt confirmed)
-- [ ] Pit bonus (winning all tricks)
-- [ ] Full game flow (16 rounds)
+- [x] Card and Deck types/utilities
+- [x] Dealing mechanism (8 cards each)
+- [x] Trump suit mechanics (Rotterdam rules)
+- [x] Legal move validation (follow suit, must trump, etc.)
+- [x] Verzaakt detection (check if any move in round was illegal)
+- [x] Trick winner determination
+- [x] Scoring system (card points + final trick bonus)
+- [x] Roem detection logic (sequences, stuk, four-of-a-kind)
+- [x] Roem claim validation (player claims, system verifies)
+- [x] "Nat" logic (playing team fails OR verzaakt confirmed)
+- [x] Pit bonus (winning all tricks)
+- [x] Full game flow (16 rounds)
 
-**Approach:** Strict TDD
-1. Enumerate all edge cases
-2. Write failing test
-3. Implement minimum code
-4. Verify green
-5. Repeat
-
-**Deliverable:** 100% tested game logic, no UI yet
+**Deliverable:** 153 unit tests, 100% tested game logic
 
 ---
 
-### Stage 3: Lobby System
+### Stage 3: Lobby System ✓
 **Goal:** Create/join lobby, seat assignment, Firebase sync
 
-- [ ] Firebase Realtime Database schema implementation
-- [ ] Lobby creation (generates shareable 6-char code)
-- [ ] Lobby joining (enter code)
-- [ ] Player session management (nickname, seat assignment)
-- [ ] Seat selection/changing
-- [ ] Real-time lobby state synchronization
-- [ ] Connection status tracking
-- [ ] Session persistence (localStorage)
-- [ ] Reconnection handling
+- [x] Firebase Realtime Database schema implementation
+- [x] Lobby creation (generates shareable 6-digit code)
+- [x] Lobby joining (enter code)
+- [x] Player session management (nickname, seat assignment)
+- [x] Seat selection/changing (with swap)
+- [x] Real-time lobby state synchronization
+- [x] Connection status tracking
+- [x] Session persistence (localStorage)
+- [x] Reconnection handling
+- [x] Host transfer on disconnect
 
-**Deliverable:** 4 browsers can join same lobby, see each other
+**Deliverable:** 210 tests (unit + integration + E2E), full lobby UI
 
 ---
 
@@ -177,27 +184,23 @@ klaverjas/
 ### Firebase Data Model (Ephemeral)
 
 ```typescript
-// Realtime Database structure
+// Realtime Database structure (as implemented)
 {
   "lobbies": {
-    "[lobbyCode]": {
+    "[6-digit code]": {
+      "code": "string",
       "host": "playerId",
+      "createdAt": number,
+      "status": "waiting" | "playing" | "finished",
       "players": {
         "[playerId]": {
           "name": "string",
-          "seat": 0-3 | "spectator" | "table",
-          "connected": boolean
+          "seat": 0 | 1 | 2 | 3 | "table",  // 0=Zuid, 1=West, 2=Noord, 3=Oost
+          "connected": boolean,
+          "lastSeen": number
         }
       },
-      "game": {
-        "phase": "waiting" | "trump" | "playing" | "scoring",
-        "round": 1-16,
-        "trump": "hearts" | "diamonds" | "clubs" | "spades",
-        "currentTrick": [...],
-        "hands": { /* per-player hands */ },
-        "scores": { "ns": number, "we": number },
-        "currentPlayer": 0-3
-      }
+      "game": GameState | null  // See src/lib/multiplayer/types.ts
     }
   }
 }
@@ -232,10 +235,11 @@ klaverjas/
 - Hand interaction
 - Score display
 
-### E2E Tests (Playwright)
-- Full game flow
-- Multiplayer scenarios (multiple browser contexts)
-- Table device mode
+### E2E Tests (Playwright) ✓
+- [x] Lobby flow (create, join, seat selection, start)
+- [ ] Full game flow
+- [ ] Multiplayer scenarios (multiple browser contexts)
+- [ ] Table device mode
 
 ---
 

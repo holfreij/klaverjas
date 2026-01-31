@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Current stage: **Stage 3 - Lobby System**
+Current stage: **Stage 4 - Game UI** (next)
 
 See [plans/roadmap.md](plans/roadmap.md) for the full project roadmap.
 
@@ -74,13 +74,50 @@ All implementation followed strict TDD workflow:
 
 ---
 
-## Stage 3 - Lobby System
+## Stage 3 - Lobby System - COMPLETED
 
 See [specs/multiplayer.md](specs/multiplayer.md) for lobby specifications.
 
-- [ ] Firebase data model for lobbies
-- [ ] Create lobby functionality
-- [ ] Join lobby with seat selection
-- [ ] Real-time sync of lobby state
-- [ ] Ready/not ready status
-- [ ] Start game when all players ready
+### Multiplayer Infrastructure
+
+- [x] **Firebase initialization** (`src/lib/multiplayer/firebase.ts`)
+- [x] **Lobby types** (`src/lib/multiplayer/types.ts`)
+  - Lobby, Player, Seat, GameState interfaces
+  - Connection state types
+  - Session data for localStorage
+
+### Lobby Logic (TDD)
+
+- [x] **generateLobbyCode()**: Random 6-digit code
+- [x] **validatePlayerName()**: 3-50 chars, trim whitespace
+- [x] **canStartGame()**: Check all 4 seats filled (table doesn't count)
+- [x] **getNewHost()**: Find lowest seat number for host transfer
+
+### Firebase Lobby Service
+
+- [x] **createLobby()**: Create lobby, add host at seat 0
+- [x] **joinLobby()**: Join with name/code, auto-assign seat
+- [x] **leaveLobby()**: Remove player, transfer host, cleanup
+- [x] **changeSeat()**: Change seat, swap if occupied
+- [x] **startGame()**: Host-only, requires 4 players
+- [x] **subscribeLobby()**: Real-time updates
+- [x] **reconnect()**: Session persistence via localStorage
+
+### UI Components
+
+- [x] **HomePage**: Create/join lobby forms
+- [x] **LobbyRoom**: Table view with seats, player list, start button
+
+### Testing
+
+- [x] Unit tests: 21 tests for lobby logic
+- [x] Integration tests: 17 tests for Firebase operations
+- [x] E2E tests: 19 Playwright tests for full user flows
+
+**Test Results: 210 tests passing (191 vitest + 19 Playwright)**
+
+---
+
+## Stage 4 - Game UI
+
+Coming next...

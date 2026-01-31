@@ -22,3 +22,15 @@ Decisions made during development that should not be re-asked.
 ### game.ts - Roem
 - **Timing**: Must claim before next trick starts
 - **Previous tricks**: Cannot claim roem for previous tricks
+
+## Stage 3 - Lobby System
+
+### Firebase
+- **Config**: Hardcoded in app (public information, safe to expose)
+- **Testing**: Pure lobby logic tested without Firebase; separate integration tests for Firebase interactions including error handling
+
+### Lobby Rules
+- **Start condition**: Host has 'start' button, disabled until exactly 4 players are seated (0-3)
+- **Table device**: Joins same way as players, selects "Tafel" as seat, does NOT count towards start condition
+- **Host transfer**: On host disconnect, lowest seat number becomes new host
+- **Player names**: 3-50 characters, whitespace trimmed, must be unique in lobby
