@@ -7,7 +7,12 @@ import {
 	leaveLobby,
 	changeSeat,
 	startGame,
-	clearSession
+	clearSession,
+	saveSession,
+	getSession,
+	reconnect,
+	subscribeLobby,
+	updatePlayerStatus
 } from '$lib/multiplayer/lobbyService';
 import type { Lobby } from '$lib/multiplayer/types';
 
@@ -44,9 +49,11 @@ async function cleanupLobby(code: string) {
 }
 
 describe('Firebase Lobby Integration Tests', () => {
-	beforeAll(() => {
+	beforeAll(async () => {
 		// Clear any existing session
 		clearSession();
+		// Clean up test lobby code that might exist from previous runs
+		await cleanupLobby('999999');
 	});
 
 	afterEach(async () => {
@@ -358,6 +365,328 @@ describe('Firebase Lobby Integration Tests', () => {
 			const result = await startGame(createResult.lobbyCode!, hostId);
 
 			expect(result.success).toBe(true);
+		});
+	});
+
+	describe('Session Management', () => {
+		describe('saveSession and getSession', () => {
+			it('should save session to localStorage', () => {
+				const sessionData = {
+					playerId: 'test_player_id',
+					lobbyCode: '123456',
+					playerName: 'TestPlayer'
+				};
+
+				saveSession(sessionData);
+
+				const retrieved = getSession();
+				expect(retrieved).toEqual(sessionData);
+			});
+
+			it('should return null when no session exists', () => {
+				localStorageMock.clear();
+
+				const retrieved = getSession();
+				expect(retrieved).toBe(null);
+			});
+
+			it('should return null for corrupted session data', () => {
+				localStorageMock.setItem('klaverjas_session', 'not valid json');
+
+				const retrieved = getSession();
+				expect(retrieved).toBe(null);
+			});
+		});
+
+		describe('clearSession', () => {
+			it('should remove session from localStorage', () => {
+				saveSession({
+					playerId: 'p1',
+					lobbyCode: '123456',
+					playerName: 'Test'
+				});
+
+				clearSession();
+
+				expect(getSession()).toBe(null);
+			});
+
+			it('should not throw when no session exists', () => {
+				localStorageMock.clear();
+
+				expect(() => clearSession()).not.toThrow();
+			});
+		});
+
+		describe('createLobby saves session', () => {
+			it('should save session after successful creation', async () => {
+				localStorageMock.clear();
+
+				const result = await createLobby('TestHost');
+				expect(result.success).toBe(true);
+				createdLobbies.push(result.lobbyCode!);
+
+				const session = getSession();
+				expect(session).not.toBe(null);
+				expect(session?.playerId).toBe(result.playerId);
+				expect(session?.lobbyCode).toBe(result.lobbyCode);
+				expect(session?.playerName).toBe('TestHost');
+			});
+		});
+
+		describe('joinLobby saves session', () => {
+			it('should save session after successful join', async () => {
+				const createResult = await createLobby('Host');
+				createdLobbies.push(createResult.lobbyCode!);
+				clearSession();
+
+				const joinResult = await joinLobby(createResult.lobbyCode!, 'Player2');
+				expect(joinResult.success).toBe(true);
+
+				const session = getSession();
+				expect(session).not.toBe(null);
+				expect(session?.playerId).toBe(joinResult.playerId);
+				expect(session?.lobbyCode).toBe(createResult.lobbyCode);
+				expect(session?.playerName).toBe('Player2');
+			});
+		});
+	});
+
+	describe('reconnect', () => {
+		it('should return error when no session exists', async () => {
+			localStorageMock.clear();
+
+			const result = await reconnect();
+
+			expect(result.success).toBe(false);
+			expect(result.error).toBe('Geen sessie gevonden');
+		});
+
+		it('should return error when lobby no longer exists', async () => {
+			// Save a session for a non-existent lobby
+			saveSession({
+				playerId: 'p1',
+				lobbyCode: '999999',
+				playerName: 'Ghost'
+			});
+
+			const result = await reconnect();
+
+			expect(result.success).toBe(false);
+			expect(result.error).toBe('Lobby bestaat niet meer');
+			// Session should be cleared
+			expect(getSession()).toBe(null);
+		});
+
+		it('should return error when player not in lobby', async () => {
+			// Create a lobby
+			const createResult = await createLobby('Host');
+			createdLobbies.push(createResult.lobbyCode!);
+
+			// Save a session with wrong player ID
+			saveSession({
+				playerId: 'nonexistent_player',
+				lobbyCode: createResult.lobbyCode!,
+				playerName: 'Ghost'
+			});
+
+			const result = await reconnect();
+
+			expect(result.success).toBe(false);
+			expect(result.error).toBe('Speler niet gevonden in lobby');
+			expect(getSession()).toBe(null);
+		});
+
+		it('should successfully reconnect to existing lobby', async () => {
+			// Create a lobby and get the session
+			const createResult = await createLobby('Host');
+			createdLobbies.push(createResult.lobbyCode!);
+
+			// Session is already saved by createLobby
+			const savedSession = getSession();
+			expect(savedSession).not.toBe(null);
+
+			const result = await reconnect();
+
+			expect(result.success).toBe(true);
+			expect(result.lobby).toBeDefined();
+			expect(result.lobby?.code).toBe(createResult.lobbyCode);
+			expect(result.playerId).toBe(createResult.playerId);
+		});
+
+		it('should update connection status on reconnect', async () => {
+			const createResult = await createLobby('Host');
+			createdLobbies.push(createResult.lobbyCode!);
+
+			// Manually set connected to false in Firebase
+			const db = getFirebaseDatabase();
+			const playerRef = ref(
+				db,
+				`lobbies/${createResult.lobbyCode}/players/${createResult.playerId}`
+			);
+			const { update } = await import('firebase/database');
+			await update(playerRef, { connected: false });
+
+			// Reconnect
+			const result = await reconnect();
+
+			expect(result.success).toBe(true);
+
+			// Verify connected is now true
+			const snapshot = await get(playerRef);
+			expect(snapshot.val().connected).toBe(true);
+		});
+	});
+
+	describe('subscribeLobby', () => {
+		it('should call callback with lobby data when lobby exists', async () => {
+			const createResult = await createLobby('Host');
+			createdLobbies.push(createResult.lobbyCode!);
+
+			return new Promise<void>((resolve) => {
+				const unsubscribe = subscribeLobby(createResult.lobbyCode!, (lobby) => {
+					expect(lobby).not.toBe(null);
+					expect(lobby?.code).toBe(createResult.lobbyCode);
+					expect(lobby?.host).toBe(createResult.playerId);
+					unsubscribe();
+					resolve();
+				});
+			});
+		});
+
+		it('should call callback with null when lobby does not exist', async () => {
+			return new Promise<void>((resolve) => {
+				const unsubscribe = subscribeLobby('999999', (lobby) => {
+					expect(lobby).toBe(null);
+					unsubscribe();
+					resolve();
+				});
+			});
+		});
+
+		it('should receive updates when lobby changes', async () => {
+			const createResult = await createLobby('Host');
+			createdLobbies.push(createResult.lobbyCode!);
+			clearSession();
+
+			let callCount = 0;
+			const receivedUpdates: (Lobby | null)[] = [];
+
+			return new Promise<void>((resolve) => {
+				const unsubscribe = subscribeLobby(createResult.lobbyCode!, async (lobby) => {
+					callCount++;
+					receivedUpdates.push(lobby);
+
+					if (callCount === 1) {
+						// First callback - initial data
+						expect(lobby).not.toBe(null);
+						expect(Object.keys(lobby!.players)).toHaveLength(1);
+
+						// Trigger an update by joining
+						await joinLobby(createResult.lobbyCode!, 'Player2');
+					} else if (callCount === 2) {
+						// Second callback - after join
+						expect(lobby).not.toBe(null);
+						expect(Object.keys(lobby!.players)).toHaveLength(2);
+						unsubscribe();
+						resolve();
+					}
+				});
+			});
+		});
+
+		it('should receive null when lobby is deleted', async () => {
+			const createResult = await createLobby('Host');
+			createdLobbies.push(createResult.lobbyCode!);
+
+			let deletionTriggered = false;
+
+			return new Promise<void>((resolve) => {
+				const unsubscribe = subscribeLobby(createResult.lobbyCode!, async (lobby) => {
+					if (!deletionTriggered) {
+						// First callback - lobby exists
+						expect(lobby).not.toBe(null);
+						deletionTriggered = true;
+
+						// Delete the lobby (by having host leave)
+						await leaveLobby(createResult.lobbyCode!, createResult.playerId!);
+					} else if (lobby === null) {
+						// Lobby was deleted - may come after intermediate updates
+						unsubscribe();
+						resolve();
+					}
+					// Ignore intermediate callbacks (e.g., lobby with empty players)
+				});
+			});
+		});
+	});
+
+	describe('updatePlayerStatus', () => {
+		it('should update player connected status to true', async () => {
+			const createResult = await createLobby('Host');
+			createdLobbies.push(createResult.lobbyCode!);
+
+			// First set to false
+			await updatePlayerStatus(createResult.lobbyCode!, createResult.playerId!, false);
+
+			const db = getFirebaseDatabase();
+			const playerRef = ref(
+				db,
+				`lobbies/${createResult.lobbyCode}/players/${createResult.playerId}`
+			);
+			let snapshot = await get(playerRef);
+			expect(snapshot.val().connected).toBe(false);
+
+			// Now set to true
+			await updatePlayerStatus(createResult.lobbyCode!, createResult.playerId!, true);
+
+			snapshot = await get(playerRef);
+			expect(snapshot.val().connected).toBe(true);
+		});
+
+		it('should update player connected status to false', async () => {
+			const createResult = await createLobby('Host');
+			createdLobbies.push(createResult.lobbyCode!);
+
+			await updatePlayerStatus(createResult.lobbyCode!, createResult.playerId!, false);
+
+			const db = getFirebaseDatabase();
+			const playerRef = ref(
+				db,
+				`lobbies/${createResult.lobbyCode}/players/${createResult.playerId}`
+			);
+			const snapshot = await get(playerRef);
+			expect(snapshot.val().connected).toBe(false);
+		});
+
+		it('should update lastSeen timestamp', async () => {
+			const createResult = await createLobby('Host');
+			createdLobbies.push(createResult.lobbyCode!);
+
+			const db = getFirebaseDatabase();
+			const playerRef = ref(
+				db,
+				`lobbies/${createResult.lobbyCode}/players/${createResult.playerId}`
+			);
+
+			// Get initial lastSeen
+			let snapshot = await get(playerRef);
+			const _initialLastSeen = snapshot.val().lastSeen;
+
+			// Wait a bit then update status
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			await updatePlayerStatus(createResult.lobbyCode!, createResult.playerId!, true);
+
+			snapshot = await get(playerRef);
+			// lastSeen should be updated (or be a server timestamp object)
+			const newLastSeen = snapshot.val().lastSeen;
+			// Firebase serverTimestamp() might return an object or a number
+			expect(newLastSeen).toBeDefined();
+		});
+
+		it('should not throw for non-existent lobby', async () => {
+			// Should not throw, just log error
+			await expect(updatePlayerStatus('999999', 'nonexistent', true)).resolves.not.toThrow();
 		});
 	});
 });

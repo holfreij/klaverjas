@@ -325,6 +325,7 @@ export function subscribeLobby(
 
 /**
  * Updates player's lastSeen timestamp and connected status.
+ * Only updates if the lobby and player exist to avoid creating orphan data.
  */
 export async function updatePlayerStatus(
 	lobbyCode: string,
@@ -332,7 +333,15 @@ export async function updatePlayerStatus(
 	connected: boolean
 ): Promise<void> {
 	try {
+		// First check if the player exists to avoid creating orphan data
 		const playerRef = ref(getFirebaseDatabase(), `lobbies/${lobbyCode}/players/${playerId}`);
+		const snapshot = await get(playerRef);
+
+		if (!snapshot.exists()) {
+			// Player doesn't exist, nothing to update
+			return;
+		}
+
 		await update(playerRef, {
 			connected,
 			lastSeen: serverTimestamp()

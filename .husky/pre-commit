@@ -1,1 +1,42 @@
-npx lint-staged
+#!/bin/sh
+
+echo "Running pre-commit checks..."
+
+# Run type checking
+echo "1/4 Type checking..."
+npm run check
+if [ $? -ne 0 ]; then
+  echo "❌ Type checking failed. Please fix the errors above."
+  exit 1
+fi
+echo "✅ Type checking passed"
+
+# Run linting
+echo "2/4 Linting..."
+npm run lint
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed. Please fix the errors above."
+  exit 1
+fi
+echo "✅ Linting passed"
+
+# Run prettier format check
+echo "3/4 Format checking..."
+npm run format:check
+if [ $? -ne 0 ]; then
+  echo "❌ Format check failed. Run 'npm run format' to fix."
+  exit 1
+fi
+echo "✅ Format check passed"
+
+# Run tests
+echo "4/4 Running tests..."
+npm run test
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed. Please fix the failing tests."
+  exit 1
+fi
+echo "✅ Tests passed"
+
+echo ""
+echo "✅ All pre-commit checks passed!"
