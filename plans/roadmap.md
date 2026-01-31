@@ -62,75 +62,73 @@ klaverjas/
 - [x] Configure GitHub Actions for GitHub Pages deployment
 - [x] Create CLAUDE.md with project conventions
 - [x] Create specs/ directory with initial spec files
-- [ ] Set up Firebase project (Realtime Database) - *requires manual setup*
-- [ ] Basic PWA manifest and service worker
-- [ ] Verify deployment to GitHub Pages
+- [x] Set up Firebase project (Realtime Database)
 
 **Deliverable:** Empty app deploys to GitHub Pages automatically
 
 ---
 
-### Stage 2: Core Game Logic ✓
-**Goal:** Complete, tested Klaverjas rules engine
+### Stage 2: Core Game Logic
+**Goal:** Complete, tested Klaverjas rules engine (TDD rebuild)
 
-- [x] Card and Deck types/utilities
-- [x] Dealing mechanism (8 cards each)
-- [x] Trump suit mechanics (Rotterdam rules)
-- [x] Legal move validation (follow suit, must trump, etc.)
-- [x] Trick winner determination
-- [x] Scoring system (card points + final trick bonus)
-- [x] Roem detection logic (sequences, stuk, four-of-a-kind)
-- [x] Roem claim validation (player claims, system verifies)
-- [x] "Nat" logic (playing team fails)
-- [x] Pit bonus (winning all tricks)
-- [x] Full game flow (16 rounds)
+- [ ] Card and Deck types/utilities
+- [ ] Dealing mechanism (8 cards each)
+- [ ] Trump suit mechanics (Rotterdam rules)
+- [ ] Legal move validation (follow suit, must trump, etc.)
+- [ ] Verzaakt detection (check if any move in round was illegal)
+- [ ] Trick winner determination
+- [ ] Scoring system (card points + final trick bonus)
+- [ ] Roem detection logic (sequences, stuk, four-of-a-kind)
+- [ ] Roem claim validation (player claims, system verifies)
+- [ ] "Nat" logic (playing team fails OR verzaakt confirmed)
+- [ ] Pit bonus (winning all tricks)
+- [ ] Full game flow (16 rounds)
 
-**Approach:** TDD - write tests first, then implementation
+**Approach:** Strict TDD
+1. Enumerate all edge cases
+2. Write failing test
+3. Implement minimum code
+4. Verify green
+5. Repeat
 
 **Deliverable:** 100% tested game logic, no UI yet
 
 ---
 
-### Stage 3: Single-Device Prototype
-**Goal:** Playable game on one device
+### Stage 3: Lobby System
+**Goal:** Create/join lobby, seat assignment, Firebase sync
 
-- [ ] Card component (visual representation)
-- [ ] Hand component (fan of cards)
-- [ ] Table/trick area component
-- [ ] Trump indicator
-- [ ] Score display
-- [ ] Turn indicator
-- [ ] "God mode" - control all 4 hands from one device
-- [ ] Complete game flow UI (dealing, trump selection, playing, scoring)
-
-**Deliverable:** Can play full game locally, all hands visible
-
----
-
-### Stage 4: Multiplayer Foundation
-**Goal:** Lobby system and state sync
-
-- [ ] Firebase Realtime Database schema design
-- [ ] Lobby creation (generates shareable code)
+- [ ] Firebase Realtime Database schema implementation
+- [ ] Lobby creation (generates shareable 6-char code)
 - [ ] Lobby joining (enter code)
 - [ ] Player session management (nickname, seat assignment)
-- [ ] Real-time state synchronization
-- [ ] Connection status handling
-- [ ] Player disconnect/reconnect handling
+- [ ] Seat selection/changing
+- [ ] Real-time lobby state synchronization
+- [ ] Connection status tracking
+- [ ] Session persistence (localStorage)
+- [ ] Reconnection handling
 
 **Deliverable:** 4 browsers can join same lobby, see each other
 
 ---
 
-### Stage 5: Full Multiplayer Game
-**Goal:** Complete online play
+### Stage 4: Multiplayer Gameplay
+**Goal:** Cards, turns, scoring, verzaakt, disconnection handling
 
-- [ ] Private hand view (only see your own cards)
-- [ ] Turn enforcement (only active player can play)
-- [ ] Server-side move validation (prevent cheating)
+- [ ] Card component (visual representation)
+- [ ] Hand component (fan/waaier of cards)
+- [ ] Table/trick area component
+- [ ] Trump indicator
+- [ ] Score display
+- [ ] Turn indicator
+- [ ] Private hand view (only see own cards)
+- [ ] Any card playable (no automatic prevention)
+- [ ] Roem claim button and validation
+- [ ] Verzaakt button and verification
 - [ ] Trump selection phase (multiplayer)
-- [ ] Round progression
-- [ ] Score tracking across rounds
+- [ ] Trick timing (1-2 second delay)
+- [ ] Round progression with Firebase sync
+- [ ] Disconnection handling with timeout
 - [ ] Game completion and final scores
 - [ ] Rematch functionality
 
@@ -138,24 +136,26 @@ klaverjas/
 
 ---
 
-### Stage 6: Advanced Features
-**Goal:** Spectator and Table modes
+### Stage 5: Table Device
+**Goal:** Central display for local play
 
-- [ ] Spectator role in lobby (can see all hands)
-- [ ] Table device mode:
-  - [ ] Shows played cards (trick area only)
-  - [ ] Position-aware (knows which player is where)
-  - [ ] Current trick display
-  - [ ] Between-round statistics
-  - [ ] Last trick replay
-- [ ] Visual feedback when cards are played
-- [ ] Sound effects (optional)
+- [ ] Table device role in lobby
+- [ ] Position calibration (which physical seat is South)
+- [ ] Large trick area display
+- [ ] Cards appear from player's direction
+- [ ] Player names at screen edges
+- [ ] Active player indicator
+- [ ] Roem claim sound/animation
+- [ ] Cards animate toward winner
+- [ ] Statistics panel (scores, tricks, roem)
+- [ ] Between-round statistics view
+- [ ] Last trick replay
 
 **Deliverable:** Full local play experience with phones + table device
 
 ---
 
-### Stage 7: Polish & PWA
+### Stage 6: Polish & PWA
 **Goal:** Production-ready PWA
 
 - [ ] Install prompt handling

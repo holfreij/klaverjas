@@ -1,188 +1,165 @@
 # Implementation Plan
 
-Current stage: **Stage 5 - Full Multiplayer Game** (Complete)
+Current stage: **Stage 2 - Core Game Logic** (TDD)
 
 See [plans/roadmap.md](plans/roadmap.md) for the full project roadmap.
 
 ---
 
-## Stage 5 - Complete
+## Stage 2 - Core Game Logic (TDD)
 
-### Firebase Game Operations (src/lib/multiplayer/game.ts)
+All implementation MUST follow strict TDD workflow:
+1. Enumerate edge cases
+2. Write failing test (RED)
+3. Implement minimum code (GREEN)
+4. Refactor
+5. Repeat
 
-- [x] **startGame()** - Initialize game state in Firebase
-  - Creates dealt hands, sets phase to 'trump'
-  - Updates lobby status to 'playing'
+### deck.ts - Card and Deck Types
 
-- [x] **selectTrump()** - Player selects trump suit
-  - Validates it's the player's turn
-  - Sets trump and playing team
+- [ ] **Types**: Card, Suit, Rank, Hand
+- [ ] **createDeck()**: Generate 32-card deck
+- [ ] **shuffleDeck()**: Randomize deck
+- [ ] **dealHands()**: Deal 8 cards to each of 4 players
+- [ ] **sortHand()**: Sort by suit (S-H-C-D), then by rank within suit
 
-- [x] **playCardMultiplayer()** - Play a card with validation
-  - Validates it's player's turn
-  - Validates card is in hand
-  - Validates move is legal (rules check)
-  - Updates game state in Firebase
-  - Handles trick completion
+Edge cases:
+- All 4 suits present after creation
+- All 8 ranks present after creation (7-A)
+- Shuffle produces different order (statistical test)
+- Each player gets exactly 8 cards after deal
+- No duplicate cards after deal
+- Sort order: Spades first, then Hearts, Clubs, Diamonds
+- Non-trump rank order: A-10-K-Q-J-9-8-7 (high to low)
+- Trump rank order: J-9-A-10-K-Q-8-7 (high to low)
 
-- [x] **claimRoemMultiplayer()** - Handle roem claims
-  - Validates claim against player's cards
-  - Adds validated claim to game state
+### rules.ts - Legal Moves and Trick Winner
 
-- [x] **subscribeGame()** - Real-time game state sync
+- [ ] **getLegalMoves()**: Determine which cards would be legal (for verzaakt validation)
+- [ ] **isLegalMove()**: Check if specific card is legal to play
+- [ ] **checkAllMovesInRound()**: Analyze round for verzaakt - returns all illegal moves
+- [ ] **determineTrickWinner()**: Find winning card in trick
+- [ ] **getCardStrength()**: Ranking value for comparison (trump vs non-trump)
 
-- [x] **requestRematch()** - Reset game for new game
+Legal move rules (Rotterdam):
+1. Has led suit → must play it
+2. No led suit, no trump in trick → must trump if has trump
+3. No led suit, trump in trick, has higher trump → must over-trump
+4. No led suit, trump in trick, no higher trump, has trump → must under-trump
+5. No led suit, no trump → can play anything
+6. Rotterdam: must trump even if partner is winning
 
-- [x] **Helper functions** - isPlayerTurn, getHandForSeat, getLegalMovesForPlayer
+Edge cases (legal moves):
+- Following suit with only one option
+- Following suit with multiple options (all legal)
+- Must trump when can't follow suit (partner winning, still must trump)
+- Must over-trump when existing trump in trick
+- Must under-trump when can't over-trump but has lower trump
+- Can play anything when can't follow and has no trump
+- First card of trick → any card is legal
 
-### Multiplayer Game Store (src/lib/stores/)
+Edge cases (trick winner):
+- No trump played → highest of led suit wins
+- One trump played → that trump wins
+- Multiple trumps → highest trump wins
+- Trump J beats everything (highest trump)
+- Trump 9 is second highest
 
-- [x] **multiplayerGameStore.svelte.ts** - Reactive game state
-  - Firebase sync integration
-  - Private hand view (only player's own hand)
-  - Turn enforcement helpers
-  - Game actions (selectTrump, playCard, claimRoem)
+Edge cases (verzaakt detection):
+- Multiple illegal moves in same round
+- Illegal move in first trick
+- Illegal move in last trick
+- No illegal moves (valid round)
 
-### UI Updates
+### scoring.ts - Point Calculation
 
-- [x] **lobby/+page.svelte** - Start game functionality
-  - Implement handleStartGame() to call startGame()
-  - Navigate to game page when game starts
+- [ ] **getCardPoints()**: Point value for trump/non-trump
+- [ ] **calculateTrickPoints()**: Sum of card values in trick
+- [ ] **calculateRoundResult()**: Determine winner, handle nat/pit
+- [ ] **calculateMajorityThreshold()**: Points needed to win (half of total + 1)
 
-- [x] **game/+page.svelte** - Multiplayer game page
-  - Private hand view (only see own cards)
-  - Other players show card count only
-  - Turn indicator and enforcement
-  - Trump selection phase UI
-  - Score display
+Card point values:
+- Trump: J=20, 9=14, A=11, 10=10, K=4, Q=3, 8=0, 7=0
+- Non-trump: A=11, 10=10, K=4, Q=3, J=2, 9=0, 8=0, 7=0
+- Last trick bonus: +10
 
-### Game Flow
+Edge cases (scoring):
+- Total base points always 162 (152 cards + 10 last trick)
+- Playing team needs ≥82 to win (no roem)
+- With 40 roem: total is 202, need ≥102 to win
+- Nat: playing team < threshold → 0 points, opponents get 162 + all roem
+- Pit: playing team wins all 8 tricks → 262 points (162 + 100 bonus)
+- Draw within a round is not possible (odd total)
 
-- [x] Trump selection phase (multiplayer)
-- [x] Round progression with Firebase sync
-- [x] Score tracking across rounds
-- [x] Game completion detection
-- [x] Final scores display
-- [x] Rematch functionality
+### roem.ts - Bonus Combinations
 
-### Test Coverage
+- [ ] **detectRoem()**: Find all roem in a 4-card trick
+- [ ] **validateRoemClaim()**: Check if claimed amount matches actual roem
+- [ ] **getRoemPoints()**: Calculate total roem in trick
 
-- [x] Unit tests for game.ts functions (19 new tests)
-- Total: 142 unit tests passing
+Roem in a trick (4 cards from different players):
+- Sequence of 3 same suit: 20 points
+- Sequence of 4 same suit: 50 points
+- Stuk (K+Q of trump): 20 points
+- Four of a kind: 100 points
+- Combined: K-Q-J of trump = 40, A-K-Q-J of trump = 70
 
----
+Edge cases (roem):
+- Sequence must be same suit
+- Sequence order: 7-8-9-10-J-Q-K-A
+- 7-8-9-10 is one sequence of 4 (50), not two of 3
+- K-Q of trump in non-trump sequence still adds stuk
+- Four of a kind: all 4 players play same rank
+- Four Kings including trump K: just 100 (no extra for trump)
+- Claim 20: could be 3-sequence OR stuk
+- Claim 40: must be 3-sequence AND stuk (K-Q-J trump)
+- Claim 50: must be 4-sequence
+- Claim 70: must be 4-sequence AND stuk (A-K-Q-J trump)
+- Claim 100: must be four of a kind
+- Invalid claim rejected (player can retry)
 
-## Stage 4 - Completed
+### game.ts - Full Game Engine
 
-### Firebase Integration (src/lib/multiplayer/)
+- [ ] **createGame()**: Initialize 16-round game state
+- [ ] **startRound()**: Deal cards, set dealer, determine trump chooser
+- [ ] **chooseTrump()**: Set trump suit (mandatory, no passing)
+- [ ] **playCard()**: Process card play (no validation, just record)
+- [ ] **claimRoem()**: Process roem claim with validation
+- [ ] **callVerzaakt()**: Check accused player's moves, determine result
+- [ ] **completeTrick()**: Handle trick end, award points + roem to winner
+- [ ] **completeRound()**: Calculate final scores, handle nat/pit
+- [ ] **isGameComplete()**: Check if 16 rounds done
+- [ ] **getGameResult()**: Final scores and winner
 
-- [x] **firebase.ts** - Firebase configuration and initialization
-  - Firebase app and database initialization
-  - Singleton pattern for safe re-initialization
+Game flow:
+1. Round starts → cards dealt
+2. Player left of dealer chooses trump (mandatory)
+3. That player's team is "playing team"
+4. Player left of dealer leads first trick
+5. 8 tricks played
+6. Round scored (check nat/pit)
+7. Dealer rotates clockwise
+8. After 16 rounds → game complete
 
-- [x] **types.ts** - Multiplayer TypeScript types
-  - Lobby, LobbyPlayer, LocalSession types
-  - MultiplayerGameState for future game sync
-  - Seat type (0-3, 'spectator', 'table')
+Edge cases (game flow):
+- First dealer is South (seat 0)
+- First trump chooser is West (seat 1, left of dealer)
+- Dealer rotates: 0→1→2→3→0...
+- Winner of trick leads next
+- Playing team determined by who chooses trump
+- Verzaakt ends round immediately
+- All roem discarded on verzaakt
+- Pit only for playing team (defenders can't get pit)
 
-- [x] **lobby.ts** - Lobby service
-  - createLobby() - Generate 6-char code, join as host
-  - joinLobby() - Enter code, auto-assign seat
-  - leaveLobby() - Leave and cleanup
-  - changeSeat() - Switch seats
-  - subscribeLobby() - Real-time lobby updates
-  - isLobbyFull(), getPlayersBySeat() - Utility functions
-
-- [x] **session.ts** - Player session management
-  - saveSession(), loadSession(), clearSession() - LocalStorage
-  - Session persistence for reconnection
-
-- [x] **connection.ts** - Connection status handling
-  - subscribeConnectionStatus() - Firebase .info/connected
-  - ConnectionStatus type (connecting, connected, disconnected)
-
-- [x] **index.ts** - Module exports
-
-### Lobby Store (src/lib/stores/)
-
-- [x] **lobbyStore.svelte.ts** - Svelte 5 reactive store
-  - Firebase sync integration
-  - Session persistence
-  - Auto-reconnection on page refresh
-  - Connection status tracking
-  - Host/join/leave actions
-
-### UI Components (src/lib/components/)
-
-- [x] **ConnectionStatus.svelte** - Connection indicator
-  - Animated connecting state
-  - Color-coded status
-
-- [x] **LobbyPlayerList.svelte** - Player list with seats
-  - 4 seat positions (South, West, North, East)
-  - Team indicators (NS/WE)
-  - Click to change seat
-  - Online/offline status
-  - Host badge
-
-### Pages (src/routes/)
-
-- [x] **+page.svelte** - Updated home page
-  - Host Game button → create lobby
-  - Join Game button → enter code
-  - Local Play button → single-device mode
-  - Connection status indicator
-
-- [x] **lobby/+page.svelte** - Lobby waiting room
-  - Display lobby code (click to copy)
-  - Player list with seat selection
-  - Host can start game when full
-  - Leave lobby button
-
-### Test Coverage
-
-- 17 new unit tests for lobby utilities
-
----
-
-## Stage 3 - Completed (Previously)
-
-### UI Components (src/lib/components/)
-
-- [x] **Card.svelte** - Visual card representation
-- [x] **Hand.svelte** - Fan of cards
-- [x] **Table.svelte** - Trick area
-- [x] **TrumpIndicator.svelte** - Trump display
-- [x] **TrumpSelector.svelte** - Trump selection UI
-- [x] **ScoreDisplay.svelte** - Score tracking
-
-### State Management (src/lib/stores/)
-
-- [x] **gameStore.svelte.ts** - Reactive game state
-
-### Game Page (src/routes/play/)
-
-- [x] **+page.svelte** - Full game interface (god mode)
+State tracking:
+- Store hand snapshots at start of each trick (for verzaakt)
+- Track all played cards in round
+- Track roem claims per trick
+- Track which team won each trick
 
 ---
 
-## Stage 2 - Completed (Previously)
-
-### Game Logic Modules (src/lib/game/)
-
-- [x] **deck.ts** - Card and Deck types/utilities
-- [x] **rules.ts** - Legal move validation and trick winner
-- [x] **scoring.ts** - Point calculation and round result
-- [x] **roem.ts** - Bonus combinations
-- [x] **game.ts** - Full game engine
-
-### Test Coverage
-
-- 106 unit tests covering all game logic
-
----
-
-## Stage 1 - Completed (Previously)
+## Stage 1 - Completed
 
 - [x] Initialize SvelteKit project with TypeScript
 - [x] Configure Tailwind CSS v4
@@ -193,22 +170,10 @@ See [plans/roadmap.md](plans/roadmap.md) for the full project roadmap.
 - [x] Create plans/roadmap.md
 - [x] Set up Firebase project
 
-### Pending from Stage 1
-- [ ] Set up basic PWA manifest
-- [ ] Verify deployment to GitHub Pages (push to main, check Actions)
-
 ---
 
 ## Next Stage Preview
 
-**Stage 6: Advanced Features** - Spectator and Table modes.
+**Stage 3: Lobby System** - Firebase lobby, seat assignment, real-time sync.
 
-Key tasks:
-- Spectator role in lobby (can see all hands)
-- Table device mode (shows played cards only)
-- Between-round statistics
-- Last trick replay
-- Visual feedback when cards are played
-- Sound effects (optional)
-
-See [specs/table-device.md](specs/table-device.md) for table device specifications.
+See [specs/multiplayer.md](specs/multiplayer.md) for lobby specifications.

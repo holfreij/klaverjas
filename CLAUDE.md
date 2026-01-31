@@ -90,8 +90,72 @@ tests/
 **Non-trump**: A=11, 10=10, K=4, Q=3, J=2, 9/8/7=0
 **Trump**: J=20, 9=14, A=11, 10=10, K=4, Q=3, 8/7=0
 
-## Testing Guidelines
+## Questions First (MANDATORY)
 
-- Write tests before implementation (TDD) for game logic
-- Test edge cases: empty hands, all passes, nat scenarios, pit
-- Use descriptive test names: `it('should reject playing hearts when player has spades and spades were led')`
+### Requirement
+Before implementing ANY feature, Claude MUST ask questions until the requirements are **crystal clear**. Do NOT take the path of least resistance by making assumptions.
+
+### What to Ask About
+- **Game logic uncertainty** - "When X happens, should Y or Z occur?"
+- **Edge cases** - "What should happen if a player does X?"
+- **UI/UX design** - "How should this look? How should it behave?"
+- **User preferences** - "Do you want feature A or feature B?"
+- **Ambiguous specs** - "The spec says X, but what about Y?"
+
+### Hard Rules
+- There is NO limit on number of questions - ask 3 or ask 30, whatever is needed
+- Do NOT assume. If uncertain, ASK.
+- Do NOT implement and hope it's right. CONFIRM first.
+- Better to ask a "dumb" question than to build the wrong thing
+- If the spec is ambiguous, ask for clarification before implementing
+
+### When to Stop Asking
+Only proceed to implementation when:
+- You can explain exactly what you're building
+- You know all edge cases and how to handle them
+- You have no remaining doubts about behavior
+- The user has confirmed your understanding is correct
+
+## TDD Requirements (MANDATORY)
+
+### Scope
+- ALL code requires tests first: game logic, multiplayer, stores, components
+- No exceptions - "it's trivial" is not valid
+
+### Workflow (Mandatory Steps)
+1. **Enumerate ALL edge cases** before writing any code
+2. **Write failing test (RED)** - run tests, confirm failure
+3. **Implement minimum code (GREEN)** - run tests, confirm pass
+4. **Refactor** - keep tests green
+5. **Repeat** for each edge case
+
+### Hard Stop Rules
+Claude MUST REFUSE to continue if:
+- No test file exists for code being modified
+- Tests not run after writing
+- Implementation written before test
+- Adding features to untested code
+- Committing with failing tests
+- Skipping identified edge cases
+
+### Test Categories
+| Code Type | Test Type | Location |
+|-----------|-----------|----------|
+| Pure functions | Unit tests | `tests/unit/` |
+| Firebase ops | Integration tests | `tests/integration/` |
+| Stores | Unit tests | `tests/unit/stores/` |
+| Components | Component tests | `tests/unit/components/` |
+
+### Firebase Testing
+- NO mocking Firebase SDK
+- Use test project or emulator
+- Clean up test data after each test
+
+### Test Running
+Run `npm run test` and verify output:
+- After writing each test (verify RED)
+- After implementing (verify GREEN)
+- Before any commit (ALL GREEN)
+
+### Test Naming Convention
+Use descriptive test names: `it('should reject playing hearts when player has spades and spades were led')`
