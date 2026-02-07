@@ -22,53 +22,57 @@
 	// Trump selection helpers
 	let isTrumpPhase = $derived(gameState?.phase === 'trump');
 	let isMyTrumpTurn = $derived(isTrumpPhase && gameState?.trumpChooser === mySeat);
-	let trumpChooserName = $derived(() => {
+	let trumpChooserName = $derived.by(() => {
 		if (!gameState || !isTrumpPhase) return '';
 		const chooserSeat = gameState.trumpChooser;
 		const player = Object.values(players).find((p) => p.seat === chooserSeat);
 		return player?.name ?? '?';
 	});
 
-	// Trick completion delay
+	// Track trick length to detect when all 4 cards are played
+	let trickLength = $derived((gameState?.currentTrick ?? []).length);
 	let trickCompleteTimer: ReturnType<typeof setTimeout> | null = null;
+	let trickCompleteFired = false;
 
 	$effect(() => {
-		const trick = gameState?.currentTrick;
-		if (trick && trick.length === 4) {
+		if (trickLength === 4 && !trickCompleteFired) {
 			// All 4 cards played — wait 1.5s then complete
+			trickCompleteFired = true;
 			trickCompleteTimer = setTimeout(async () => {
 				if (lobbyCode) {
 					await completeTrick(lobbyCode);
 				}
 			}, 1500);
-		}
-
-		return () => {
+		} else if (trickLength !== 4) {
+			// Trick cleared — reset for next trick
+			trickCompleteFired = false;
 			if (trickCompleteTimer) {
 				clearTimeout(trickCompleteTimer);
 				trickCompleteTimer = null;
 			}
-		};
+		}
 	});
 
-	// Round end auto-advance
+	// Track phase to detect round end
+	let currentPhase = $derived(gameState?.phase);
 	let roundEndTimer: ReturnType<typeof setTimeout> | null = null;
+	let roundEndFired = false;
 
 	$effect(() => {
-		if (gameState?.phase === 'roundEnd') {
+		if (currentPhase === 'roundEnd' && !roundEndFired) {
+			roundEndFired = true;
 			roundEndTimer = setTimeout(async () => {
 				if (lobbyCode) {
 					await startNextRound(lobbyCode);
 				}
 			}, 3000);
-		}
-
-		return () => {
+		} else if (currentPhase !== 'roundEnd') {
+			roundEndFired = false;
 			if (roundEndTimer) {
 				clearTimeout(roundEndTimer);
 				roundEndTimer = null;
 			}
-		};
+		}
 	});
 
 	async function handleChooseTrump(suit: Card['suit']) {
@@ -95,7 +99,7 @@
 		/>
 		<TrumpSelector
 			isMyTurn={isMyTrumpTurn}
-			chooserName={trumpChooserName()}
+			chooserName={trumpChooserName}
 			onChoose={handleChooseTrump}
 		/>
 	{:else if gameState.phase === 'roundEnd'}

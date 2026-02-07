@@ -41,7 +41,10 @@
 	let rightPlayer = $derived(getPlayerBySeat(positions.right));
 
 	// My hand
-	let myHand = $derived(gameState.hands[mySeat] ?? []);
+	let myHand = $derived((gameState.hands ?? {})[mySeat] ?? []);
+
+	// Safe currentTrick (Firebase drops empty arrays)
+	let currentTrick = $derived(gameState.currentTrick ?? []);
 
 	// Get team player names for score display
 	function getTeamNames(team: 'ns' | 'we'): string {
@@ -64,7 +67,7 @@
 
 	// Button enable states
 	// Roem and Verzaakt are only enabled after at least one card is played
-	let hasCardsInTrick = $derived(gameState.currentTrick.length > 0);
+	let hasCardsInTrick = $derived(currentTrick.length > 0);
 	let canClaimRoem = $derived(hasCardsInTrick && !gameState.roemClaimed);
 	let canCallVerzaakt = $derived(hasCardsInTrick);
 </script>
@@ -141,13 +144,13 @@
 					<div class="trick-grid grid grid-cols-3 grid-rows-3 gap-0">
 						<!-- Top (partner) - row 1, col 2 -->
 						<div class="col-start-2 row-start-1 flex items-start justify-center">
-							{#each gameState.currentTrick.filter((c) => c.seat === positions.partner) as playedCard (playedCard.card.suit + playedCard.card.rank)}
+							{#each currentTrick.filter((c) => c.seat === positions.partner) as playedCard (playedCard.card.suit + playedCard.card.rank)}
 								<Card card={playedCard.card} />
 							{/each}
 						</div>
 						<!-- Left - row 2, col 1 -->
 						<div class="col-start-1 row-start-2 flex items-center justify-end">
-							{#each gameState.currentTrick.filter((c) => c.seat === positions.left) as playedCard (playedCard.card.suit + playedCard.card.rank)}
+							{#each currentTrick.filter((c) => c.seat === positions.left) as playedCard (playedCard.card.suit + playedCard.card.rank)}
 								<Card card={playedCard.card} />
 							{/each}
 						</div>
@@ -155,13 +158,13 @@
 						<div class="col-start-2 row-start-2"></div>
 						<!-- Right - row 2, col 3 -->
 						<div class="col-start-3 row-start-2 flex items-center justify-start">
-							{#each gameState.currentTrick.filter((c) => c.seat === positions.right) as playedCard (playedCard.card.suit + playedCard.card.rank)}
+							{#each currentTrick.filter((c) => c.seat === positions.right) as playedCard (playedCard.card.suit + playedCard.card.rank)}
 								<Card card={playedCard.card} />
 							{/each}
 						</div>
 						<!-- Bottom (self) - row 3, col 2 -->
 						<div class="col-start-2 row-start-3 flex items-end justify-center">
-							{#each gameState.currentTrick.filter((c) => c.seat === positions.self) as playedCard (playedCard.card.suit + playedCard.card.rank)}
+							{#each currentTrick.filter((c) => c.seat === positions.self) as playedCard (playedCard.card.suit + playedCard.card.rank)}
 								<Card card={playedCard.card} />
 							{/each}
 						</div>
