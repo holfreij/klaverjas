@@ -3,25 +3,22 @@ import { createDeck, shuffleDeck, dealHands } from './deck';
 import { determineTrickWinner, checkAllMovesInRound, type PlayedMove } from './rules';
 import { calculateTrickPoints, calculateRoundResult } from './scoring';
 import { validateRoemClaim } from './roem';
+import { type PlayerSeat, type Team, getSeatTeam } from '$lib/multiplayer/types';
 
-export type Position = 'south' | 'west' | 'north' | 'east';
-export type Team = 'north_south' | 'west_east';
-
-const POSITIONS: Position[] = ['south', 'west', 'north', 'east'];
 const LAST_TRICK_BONUS = 10;
 
 export interface TrickCard {
-	player: Position;
+	player: PlayerSeat;
 	card: Card;
 }
 
 export interface RoundState {
-	hands: Record<Position, Hand>;
-	handSnapshots: Record<number, Record<Position, Hand>>; // Snapshot at start of each trick
+	hands: Record<PlayerSeat, Hand>;
+	handSnapshots: Record<number, Record<PlayerSeat, Hand>>; // Snapshot at start of each trick
 	trump: Suit | null;
-	trumpChooser: Position;
+	trumpChooser: PlayerSeat;
 	playingTeam: Team | null;
-	currentPlayer: Position;
+	currentPlayer: PlayerSeat;
 	currentTrick: TrickCard[];
 	tricksPlayed: number;
 	tricksWon: Record<Team, number>;
@@ -33,7 +30,7 @@ export interface RoundState {
 export interface GameState {
 	totalRounds: number;
 	currentRound: number;
-	dealer: Position;
+	dealer: PlayerSeat;
 	scores: Record<Team, number>;
 	round: RoundState | null;
 }
@@ -50,49 +47,44 @@ export interface RoemClaimResult {
 
 export interface VerzaaktResult {
 	verzaaktFound: boolean;
-	guiltyPlayer?: Position;
+	guiltyPlayer?: PlayerSeat;
 	guiltyTeam?: Team;
 }
 
-function getNextPosition(position: Position): Position {
-	const index = POSITIONS.indexOf(position);
-	return POSITIONS[(index + 1) % 4];
-}
-
-function getTeam(position: Position): Team {
-	return position === 'north' || position === 'south' ? 'north_south' : 'west_east';
+function getNextPosition(position: PlayerSeat): PlayerSeat {
+	return ((position + 1) % 4) as PlayerSeat;
 }
 
 export function createGame(): GameState {
 	return {
 		totalRounds: 16,
 		currentRound: 0,
-		dealer: 'south',
-		scores: { north_south: 0, west_east: 0 },
+		dealer: 0,
+		scores: { ns: 0, we: 0 },
 		round: null
 	};
 }
 
 export function startRound(game: GameState): RoundState {
 	const deck = shuffleDeck(createDeck());
-	const [southHand, westHand, northHand, eastHand] = dealHands(deck);
+	const [hand0, hand1, hand2, hand3] = dealHands(deck);
 
 	const trumpChooser = getNextPosition(game.dealer);
 
-	const hands: Record<Position, Hand> = {
-		south: southHand,
-		west: westHand,
-		north: northHand,
-		east: eastHand
+	const hands: Record<PlayerSeat, Hand> = {
+		0: hand0,
+		1: hand1,
+		2: hand2,
+		3: hand3
 	};
 
 	// Store initial hand snapshot
-	const handSnapshots: Record<number, Record<Position, Hand>> = {
+	const handSnapshots: Record<number, Record<PlayerSeat, Hand>> = {
 		0: {
-			south: [...southHand],
-			west: [...westHand],
-			north: [...northHand],
-			east: [...eastHand]
+			0: [...hand0],
+			1: [...hand1],
+			2: [...hand2],
+			3: [...hand3]
 		}
 	};
 
@@ -105,9 +97,9 @@ export function startRound(game: GameState): RoundState {
 		currentPlayer: trumpChooser,
 		currentTrick: [],
 		tricksPlayed: 0,
-		tricksWon: { north_south: 0, west_east: 0 },
-		points: { north_south: 0, west_east: 0 },
-		roem: { north_south: 0, west_east: 0 },
+		tricksWon: { ns: 0, we: 0 },
+		points: { ns: 0, we: 0 },
+		roem: { ns: 0, we: 0 },
 		playedCards: []
 	};
 }
@@ -116,11 +108,11 @@ export function chooseTrump(game: GameState, trumpSuit: Suit): void {
 	if (!game.round) throw new Error('No active round');
 
 	game.round.trump = trumpSuit;
-	game.round.playingTeam = getTeam(game.round.trumpChooser);
+	game.round.playingTeam = getSeatTeam(game.round.trumpChooser);
 	game.round.currentPlayer = game.round.trumpChooser;
 }
 
-export function playCard(game: GameState, player: Position, card: Card): void {
+export function playCard(game: GameState, player: PlayerSeat, card: Card): void {
 	if (!game.round) throw new Error('No active round');
 
 	// Add card to current trick
@@ -140,7 +132,7 @@ export function playCard(game: GameState, player: Position, card: Card): void {
 
 export function claimRoem(
 	game: GameState,
-	player: Position,
+	player: PlayerSeat,
 	claimedPoints: number
 ): RoemClaimResult {
 	if (!game.round || !game.round.trump) throw new Error('No active round with trump');
@@ -149,14 +141,14 @@ export function claimRoem(
 	const valid = validateRoemClaim(trickCards, game.round.trump, claimedPoints);
 
 	if (valid) {
-		const team = getTeam(player);
+		const team = getSeatTeam(player);
 		game.round.roem[team] += claimedPoints;
 	}
 
 	return { valid, points: valid ? claimedPoints : 0 };
 }
 
-export function callVerzaakt(game: GameState, _caller: Position): VerzaaktResult {
+export function callVerzaakt(game: GameState, _caller: PlayerSeat): VerzaaktResult {
 	if (!game.round || !game.round.trump) throw new Error('No active round with trump');
 
 	// Must have at least 2 cards in current trick to call verzaakt
@@ -191,10 +183,10 @@ export function callVerzaakt(game: GameState, _caller: Position): VerzaaktResult
 	// Store snapshot for current trick if not already stored
 	if (!game.round.handSnapshots[currentTrickNum]) {
 		game.round.handSnapshots[currentTrickNum] = {
-			south: [...game.round.hands.south],
-			west: [...game.round.hands.west],
-			north: [...game.round.hands.north],
-			east: [...game.round.hands.east]
+			0: [...game.round.hands[0]],
+			1: [...game.round.hands[1]],
+			2: [...game.round.hands[2]],
+			3: [...game.round.hands[3]]
 		};
 	}
 
@@ -211,7 +203,7 @@ export function callVerzaakt(game: GameState, _caller: Position): VerzaaktResult
 	return {
 		verzaaktFound: true,
 		guiltyPlayer: firstIllegal.player,
-		guiltyTeam: getTeam(firstIllegal.player)
+		guiltyTeam: getSeatTeam(firstIllegal.player)
 	};
 }
 
@@ -221,7 +213,7 @@ export function completeTrick(game: GameState): void {
 	const trickCards = game.round.currentTrick.map((tc) => tc.card);
 	const winnerIndex = determineTrickWinner(trickCards, game.round.trump);
 	const winner = game.round.currentTrick[winnerIndex].player;
-	const winningTeam = getTeam(winner);
+	const winningTeam = getSeatTeam(winner);
 
 	// Calculate points
 	let points = calculateTrickPoints(trickCards, game.round.trump);
@@ -246,10 +238,10 @@ export function completeTrick(game: GameState): void {
 	// Store hand snapshot for next trick (for verzaakt checking)
 	if (game.round.tricksPlayed < 8) {
 		game.round.handSnapshots[game.round.tricksPlayed] = {
-			south: [...game.round.hands.south],
-			west: [...game.round.hands.west],
-			north: [...game.round.hands.north],
-			east: [...game.round.hands.east]
+			0: [...game.round.hands[0]],
+			1: [...game.round.hands[1]],
+			2: [...game.round.hands[2]],
+			3: [...game.round.hands[3]]
 		};
 	}
 }
@@ -258,7 +250,7 @@ export function completeRound(game: GameState): void {
 	if (!game.round || !game.round.playingTeam) throw new Error('No active round');
 
 	const playingTeam = game.round.playingTeam;
-	const defendingTeam: Team = playingTeam === 'north_south' ? 'west_east' : 'north_south';
+	const defendingTeam: Team = playingTeam === 'ns' ? 'we' : 'ns';
 
 	const result = calculateRoundResult({
 		playingTeamPoints: game.round.points[playingTeam],
@@ -288,10 +280,10 @@ export function isGameComplete(game: GameState): boolean {
 export function getGameResult(game: GameState): GameResult {
 	let winner: Team | null = null;
 
-	if (game.scores.north_south > game.scores.west_east) {
-		winner = 'north_south';
-	} else if (game.scores.west_east > game.scores.north_south) {
-		winner = 'west_east';
+	if (game.scores.ns > game.scores.we) {
+		winner = 'ns';
+	} else if (game.scores.we > game.scores.ns) {
+		winner = 'we';
 	}
 
 	return {

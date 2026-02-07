@@ -304,26 +304,15 @@ describe('LobbyRoom', () => {
 	});
 
 	describe('game started state', () => {
-		it('should show "Spel gestart!" when status is playing', () => {
+		it('should still render lobby view when status is playing (page handles routing)', () => {
 			mockStore.lobby = {
 				...mockStore.lobby!,
 				status: 'playing'
 			};
 			render(LobbyRoom);
 
-			expect(screen.getByText(/spel gestart/i)).toBeInTheDocument();
-		});
-
-		it('should hide start button when game is playing', () => {
-			mockStore.lobby = {
-				...mockStore.lobby!,
-				status: 'playing'
-			};
-			mockStore.canStart = true;
-			mockStore.isHost = true;
-			render(LobbyRoom);
-
-			expect(screen.queryByRole('button', { name: /start spel/i })).not.toBeInTheDocument();
+			// LobbyRoom still renders — page routing handles switching to GameView
+			expect(screen.getByText('123456')).toBeInTheDocument();
 		});
 	});
 

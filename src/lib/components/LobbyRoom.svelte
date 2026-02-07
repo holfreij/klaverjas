@@ -43,23 +43,18 @@
 			<!-- Center info -->
 			<div class="absolute inset-0 flex items-center justify-center">
 				<div class="text-center">
-					{#if lobbyStore.lobby?.status === 'playing'}
-						<p class="font-bold text-yellow-400">Spel gestart!</p>
-						<p class="mt-1 text-xs text-green-300">Game UI komt binnenkort...</p>
-					{:else}
-						<p class="text-sm text-green-300">{lobbyStore.playerCount}/4 spelers</p>
-						{#if lobbyStore.canStart && lobbyStore.isHost}
-							<button
-								onclick={handleStart}
-								class="mt-2 rounded-lg bg-yellow-500 px-6 py-2 font-bold text-green-900 transition-colors hover:bg-yellow-400"
-							>
-								Start spel
-							</button>
-						{:else if !lobbyStore.canStart}
-							<p class="mt-2 text-xs text-green-400">Wacht op meer spelers...</p>
-						{:else if !lobbyStore.isHost}
-							<p class="mt-2 text-xs text-green-400">Wacht op host om te starten</p>
-						{/if}
+					<p class="text-sm text-green-300">{lobbyStore.playerCount}/4 spelers</p>
+					{#if lobbyStore.canStart && lobbyStore.isHost}
+						<button
+							onclick={handleStart}
+							class="mt-2 rounded-lg bg-yellow-500 px-6 py-2 font-bold text-green-900 transition-colors hover:bg-yellow-400"
+						>
+							Start spel
+						</button>
+					{:else if !lobbyStore.canStart}
+						<p class="mt-2 text-xs text-green-400">Wacht op meer spelers...</p>
+					{:else if !lobbyStore.isHost}
+						<p class="mt-2 text-xs text-green-400">Wacht op host om te starten</p>
 					{/if}
 				</div>
 			</div>

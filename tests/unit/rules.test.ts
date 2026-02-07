@@ -234,31 +234,31 @@ describe('determineTrickWinner', () => {
 });
 
 describe('checkAllMovesInRound', () => {
-	type Position = 'south' | 'west' | 'north' | 'east';
-	type Hand = Card[];
+	type Seat = 0 | 1 | 2 | 3;
+	type HandCards = Card[];
 
-	const createMove = (player: Position, cardPlayed: Card, trickNumber: number): PlayedMove => ({
+	const createMove = (player: Seat, cardPlayed: Card, trickNumber: number): PlayedMove => ({
 		player,
 		card: cardPlayed,
 		trickNumber
 	});
 
 	it('should return empty array when no illegal moves', () => {
-		// West leads ♠10, everyone follows suit
-		const handSnapshots: Record<number, Record<Position, Hand>> = {
+		// Seat 1 leads ♠10, everyone follows suit
+		const handSnapshots: Record<number, Record<Seat, HandCards>> = {
 			0: {
-				south: [card('♠', '7'), card('♥', 'A')],
-				west: [card('♠', '10'), card('♥', 'K')],
-				north: [card('♠', 'K'), card('♥', 'Q')],
-				east: [card('♠', 'A'), card('♥', 'J')]
+				0: [card('♠', '7'), card('♥', 'A')],
+				1: [card('♠', '10'), card('♥', 'K')],
+				2: [card('♠', 'K'), card('♥', 'Q')],
+				3: [card('♠', 'A'), card('♥', 'J')]
 			}
 		};
 
 		const playedMoves: PlayedMove[] = [
-			createMove('west', card('♠', '10'), 0),
-			createMove('north', card('♠', 'K'), 0),
-			createMove('east', card('♠', 'A'), 0),
-			createMove('south', card('♠', '7'), 0)
+			createMove(1, card('♠', '10'), 0),
+			createMove(2, card('♠', 'K'), 0),
+			createMove(3, card('♠', 'A'), 0),
+			createMove(0, card('♠', '7'), 0)
 		];
 
 		const illegals = checkAllMovesInRound(playedMoves, handSnapshots, '♥');
@@ -266,44 +266,44 @@ describe('checkAllMovesInRound', () => {
 	});
 
 	it('should detect illegal move - did not follow suit', () => {
-		// West leads ♠10, South has spades but plays hearts
-		const handSnapshots: Record<number, Record<Position, Hand>> = {
+		// Seat 1 leads ♠10, seat 0 has spades but plays hearts
+		const handSnapshots: Record<number, Record<Seat, HandCards>> = {
 			0: {
-				south: [card('♠', '7'), card('♥', 'A')],
-				west: [card('♠', '10'), card('♥', 'K')],
-				north: [card('♠', 'K'), card('♥', 'Q')],
-				east: [card('♠', 'A'), card('♥', 'J')]
+				0: [card('♠', '7'), card('♥', 'A')],
+				1: [card('♠', '10'), card('♥', 'K')],
+				2: [card('♠', 'K'), card('♥', 'Q')],
+				3: [card('♠', 'A'), card('♥', 'J')]
 			}
 		};
 
 		const playedMoves: PlayedMove[] = [
-			createMove('west', card('♠', '10'), 0),
-			createMove('north', card('♠', 'K'), 0),
-			createMove('east', card('♠', 'A'), 0),
-			createMove('south', card('♥', 'A'), 0) // Illegal! Has ♠7 but played ♥A
+			createMove(1, card('♠', '10'), 0),
+			createMove(2, card('♠', 'K'), 0),
+			createMove(3, card('♠', 'A'), 0),
+			createMove(0, card('♥', 'A'), 0) // Illegal! Has ♠7 but played ♥A
 		];
 
 		const illegals = checkAllMovesInRound(playedMoves, handSnapshots, '♥');
 		expect(illegals).toHaveLength(1);
-		expect(illegals[0].player).toBe('south');
+		expect(illegals[0].player).toBe(0);
 		expect(illegals[0].trickNumber).toBe(0);
 	});
 
 	it('should detect multiple illegal moves in same round', () => {
-		const handSnapshots: Record<number, Record<Position, Hand>> = {
+		const handSnapshots: Record<number, Record<Seat, HandCards>> = {
 			0: {
-				south: [card('♠', '7'), card('♥', 'A')],
-				west: [card('♠', '10'), card('♥', 'K')],
-				north: [card('♠', 'K'), card('♥', 'Q')],
-				east: [card('♠', 'A'), card('♥', 'J')]
+				0: [card('♠', '7'), card('♥', 'A')],
+				1: [card('♠', '10'), card('♥', 'K')],
+				2: [card('♠', 'K'), card('♥', 'Q')],
+				3: [card('♠', 'A'), card('♥', 'J')]
 			}
 		};
 
 		const playedMoves: PlayedMove[] = [
-			createMove('west', card('♠', '10'), 0),
-			createMove('north', card('♥', 'Q'), 0), // Illegal! Has ♠K
-			createMove('east', card('♠', 'A'), 0),
-			createMove('south', card('♥', 'A'), 0) // Illegal! Has ♠7
+			createMove(1, card('♠', '10'), 0),
+			createMove(2, card('♥', 'Q'), 0), // Illegal! Has ♠K
+			createMove(3, card('♠', 'A'), 0),
+			createMove(0, card('♥', 'A'), 0) // Illegal! Has ♠7
 		];
 
 		const illegals = checkAllMovesInRound(playedMoves, handSnapshots, '♥');
@@ -311,20 +311,20 @@ describe('checkAllMovesInRound', () => {
 	});
 
 	it('should detect illegal move in first trick', () => {
-		const handSnapshots: Record<number, Record<Position, Hand>> = {
+		const handSnapshots: Record<number, Record<Seat, HandCards>> = {
 			0: {
-				south: [card('♠', '7')],
-				west: [card('♠', '10')],
-				north: [card('♠', 'K')],
-				east: [card('♠', 'A'), card('♥', 'J')]
+				0: [card('♠', '7')],
+				1: [card('♠', '10')],
+				2: [card('♠', 'K')],
+				3: [card('♠', 'A'), card('♥', 'J')]
 			}
 		};
 
 		const playedMoves: PlayedMove[] = [
-			createMove('west', card('♠', '10'), 0),
-			createMove('north', card('♠', 'K'), 0),
-			createMove('east', card('♥', 'J'), 0), // Illegal! Has ♠A
-			createMove('south', card('♠', '7'), 0)
+			createMove(1, card('♠', '10'), 0),
+			createMove(2, card('♠', 'K'), 0),
+			createMove(3, card('♥', 'J'), 0), // Illegal! Has ♠A
+			createMove(0, card('♠', '7'), 0)
 		];
 
 		const illegals = checkAllMovesInRound(playedMoves, handSnapshots, '♥');
@@ -333,24 +333,24 @@ describe('checkAllMovesInRound', () => {
 	});
 
 	it('should detect illegal move - did not trump when required', () => {
-		const handSnapshots: Record<number, Record<Position, Hand>> = {
+		const handSnapshots: Record<number, Record<Seat, HandCards>> = {
 			0: {
-				south: [card('♥', '7'), card('♣', 'A')], // Has trump ♥7
-				west: [card('♠', '10')],
-				north: [card('♠', 'K')],
-				east: [card('♠', 'A')]
+				0: [card('♥', '7'), card('♣', 'A')], // Has trump ♥7
+				1: [card('♠', '10')],
+				2: [card('♠', 'K')],
+				3: [card('♠', 'A')]
 			}
 		};
 
 		const playedMoves: PlayedMove[] = [
-			createMove('west', card('♠', '10'), 0),
-			createMove('north', card('♠', 'K'), 0),
-			createMove('east', card('♠', 'A'), 0),
-			createMove('south', card('♣', 'A'), 0) // Illegal! Has trump but didn't play it
+			createMove(1, card('♠', '10'), 0),
+			createMove(2, card('♠', 'K'), 0),
+			createMove(3, card('♠', 'A'), 0),
+			createMove(0, card('♣', 'A'), 0) // Illegal! Has trump but didn't play it
 		];
 
 		const illegals = checkAllMovesInRound(playedMoves, handSnapshots, '♥');
 		expect(illegals).toHaveLength(1);
-		expect(illegals[0].player).toBe('south');
+		expect(illegals[0].player).toBe(0);
 	});
 });

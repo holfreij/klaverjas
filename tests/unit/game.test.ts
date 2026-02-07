@@ -21,12 +21,12 @@ describe('createGame', () => {
 		const game = createGame();
 		expect(game.totalRounds).toBe(16);
 		expect(game.currentRound).toBe(0);
-		expect(game.scores).toEqual({ north_south: 0, west_east: 0 });
+		expect(game.scores).toEqual({ ns: 0, we: 0 });
 	});
 
-	it('should set initial dealer to South (position 0)', () => {
+	it('should set initial dealer to seat 0 (Zuid)', () => {
 		const game = createGame();
-		expect(game.dealer).toBe('south');
+		expect(game.dealer).toBe(0);
 	});
 });
 
@@ -39,15 +39,15 @@ describe('startRound', () => {
 
 	it('should deal 8 cards to each player', () => {
 		const round = startRound(game);
-		expect(round.hands.south).toHaveLength(8);
-		expect(round.hands.west).toHaveLength(8);
-		expect(round.hands.north).toHaveLength(8);
-		expect(round.hands.east).toHaveLength(8);
+		expect(round.hands[0]).toHaveLength(8);
+		expect(round.hands[1]).toHaveLength(8);
+		expect(round.hands[2]).toHaveLength(8);
+		expect(round.hands[3]).toHaveLength(8);
 	});
 
-	it('should set trump chooser to left of dealer (West when dealer is South)', () => {
+	it('should set trump chooser to left of dealer (seat 1 when dealer is seat 0)', () => {
 		const round = startRound(game);
-		expect(round.trumpChooser).toBe('west');
+		expect(round.trumpChooser).toBe(1);
 	});
 
 	it('should not have trump set yet', () => {
@@ -62,9 +62,9 @@ describe('startRound', () => {
 	});
 
 	it('should rotate trump chooser with dealer', () => {
-		game.dealer = 'west';
+		game.dealer = 1;
 		const round = startRound(game);
-		expect(round.trumpChooser).toBe('north');
+		expect(round.trumpChooser).toBe(2);
 	});
 });
 
@@ -82,14 +82,14 @@ describe('chooseTrump', () => {
 	});
 
 	it('should set the playing team based on trump chooser', () => {
-		// Trump chooser is West (West-East team)
+		// Trump chooser is seat 1 (West-East team)
 		chooseTrump(game, '♠');
-		expect(game.round!.playingTeam).toBe('west_east');
+		expect(game.round!.playingTeam).toBe('we');
 	});
 
 	it('should set first player to trump chooser', () => {
 		chooseTrump(game, '♠');
-		expect(game.round!.currentPlayer).toBe('west');
+		expect(game.round!.currentPlayer).toBe(1);
 	});
 });
 
@@ -103,33 +103,33 @@ describe('playCard', () => {
 	});
 
 	it('should record the played card', () => {
-		const cardToPlay = game.round!.hands.west[0];
-		playCard(game, 'west', cardToPlay);
-		expect(game.round!.currentTrick).toContainEqual({ player: 'west', card: cardToPlay });
+		const cardToPlay = game.round!.hands[1][0];
+		playCard(game, 1, cardToPlay);
+		expect(game.round!.currentTrick).toContainEqual({ player: 1, card: cardToPlay });
 	});
 
 	it('should remove card from player hand', () => {
-		const cardToPlay = game.round!.hands.west[0];
-		const originalHandSize = game.round!.hands.west.length;
-		playCard(game, 'west', cardToPlay);
-		expect(game.round!.hands.west).toHaveLength(originalHandSize - 1);
+		const cardToPlay = game.round!.hands[1][0];
+		const originalHandSize = game.round!.hands[1].length;
+		playCard(game, 1, cardToPlay);
+		expect(game.round!.hands[1]).toHaveLength(originalHandSize - 1);
 	});
 
 	it('should advance to next player', () => {
-		const cardToPlay = game.round!.hands.west[0];
-		playCard(game, 'west', cardToPlay);
-		expect(game.round!.currentPlayer).toBe('north');
+		const cardToPlay = game.round!.hands[1][0];
+		playCard(game, 1, cardToPlay);
+		expect(game.round!.currentPlayer).toBe(2);
 	});
 
 	it('should cycle through all 4 players', () => {
-		playCard(game, 'west', game.round!.hands.west[0]);
-		expect(game.round!.currentPlayer).toBe('north');
+		playCard(game, 1, game.round!.hands[1][0]);
+		expect(game.round!.currentPlayer).toBe(2);
 
-		playCard(game, 'north', game.round!.hands.north[0]);
-		expect(game.round!.currentPlayer).toBe('east');
+		playCard(game, 2, game.round!.hands[2][0]);
+		expect(game.round!.currentPlayer).toBe(3);
 
-		playCard(game, 'east', game.round!.hands.east[0]);
-		expect(game.round!.currentPlayer).toBe('south');
+		playCard(game, 3, game.round!.hands[3][0]);
+		expect(game.round!.currentPlayer).toBe(0);
 	});
 });
 
@@ -145,39 +145,39 @@ describe('claimRoem', () => {
 	it('should accept valid roem claim', () => {
 		// Set up a trick with roem (K-Q-J of trump = 40 points)
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♠', 'K') },
-			{ player: 'north', card: card('♠', 'Q') },
-			{ player: 'east', card: card('♠', 'J') },
-			{ player: 'south', card: card('♥', '7') }
+			{ player: 1, card: card('♠', 'K') },
+			{ player: 2, card: card('♠', 'Q') },
+			{ player: 3, card: card('♠', 'J') },
+			{ player: 0, card: card('♥', '7') }
 		];
 
-		const result = claimRoem(game, 'west', 40);
+		const result = claimRoem(game, 1, 40);
 		expect(result.valid).toBe(true);
 	});
 
 	it('should reject invalid roem claim', () => {
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♠', 'K') },
-			{ player: 'north', card: card('♠', 'Q') },
-			{ player: 'east', card: card('♠', 'J') },
-			{ player: 'south', card: card('♥', '7') }
+			{ player: 1, card: card('♠', 'K') },
+			{ player: 2, card: card('♠', 'Q') },
+			{ player: 3, card: card('♠', 'J') },
+			{ player: 0, card: card('♥', '7') }
 		];
 
-		const result = claimRoem(game, 'west', 20); // Under-claiming
+		const result = claimRoem(game, 1, 20); // Under-claiming
 		expect(result.valid).toBe(false);
 	});
 
 	it('should track claimed roem for the team', () => {
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♠', 'K') },
-			{ player: 'north', card: card('♠', 'Q') },
-			{ player: 'east', card: card('♠', 'J') },
-			{ player: 'south', card: card('♥', '7') }
+			{ player: 1, card: card('♠', 'K') },
+			{ player: 2, card: card('♠', 'Q') },
+			{ player: 3, card: card('♠', 'J') },
+			{ player: 0, card: card('♥', '7') }
 		];
 
-		claimRoem(game, 'west', 40);
-		// West is on west_east team
-		expect(game.round!.roem.west_east).toBe(40);
+		claimRoem(game, 1, 40);
+		// Seat 1 is on 'we' team
+		expect(game.round!.roem.we).toBe(40);
 	});
 });
 
@@ -193,35 +193,35 @@ describe('completeTrick', () => {
 	it('should determine trick winner and award points', () => {
 		// Force specific cards for testing
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♥', '10') },
-			{ player: 'north', card: card('♥', 'A') }, // Winner (highest of led suit)
-			{ player: 'east', card: card('♥', 'K') },
-			{ player: 'south', card: card('♥', '7') }
+			{ player: 1, card: card('♥', '10') },
+			{ player: 2, card: card('♥', 'A') }, // Winner (highest of led suit)
+			{ player: 3, card: card('♥', 'K') },
+			{ player: 0, card: card('♥', '7') }
 		];
 
 		completeTrick(game);
 		// A(11) + 10(10) + K(4) + 0 = 25 points
-		expect(game.round!.points.north_south).toBe(25);
+		expect(game.round!.points.ns).toBe(25);
 	});
 
 	it('should set next lead to trick winner', () => {
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♥', '10') },
-			{ player: 'north', card: card('♥', 'A') },
-			{ player: 'east', card: card('♥', 'K') },
-			{ player: 'south', card: card('♥', '7') }
+			{ player: 1, card: card('♥', '10') },
+			{ player: 2, card: card('♥', 'A') },
+			{ player: 3, card: card('♥', 'K') },
+			{ player: 0, card: card('♥', '7') }
 		];
 
 		completeTrick(game);
-		expect(game.round!.currentPlayer).toBe('north');
+		expect(game.round!.currentPlayer).toBe(2);
 	});
 
 	it('should increment trick count', () => {
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♥', '10') },
-			{ player: 'north', card: card('♥', 'A') },
-			{ player: 'east', card: card('♥', 'K') },
-			{ player: 'south', card: card('♥', '7') }
+			{ player: 1, card: card('♥', '10') },
+			{ player: 2, card: card('♥', 'A') },
+			{ player: 3, card: card('♥', 'K') },
+			{ player: 0, card: card('♥', '7') }
 		];
 
 		completeTrick(game);
@@ -231,24 +231,24 @@ describe('completeTrick', () => {
 	it('should add last trick bonus on trick 8', () => {
 		game.round!.tricksPlayed = 7;
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♥', '7') },
-			{ player: 'north', card: card('♥', '8') },
-			{ player: 'east', card: card('♥', '9') },
-			{ player: 'south', card: card('♥', 'A') } // South wins with Ace
+			{ player: 1, card: card('♥', '7') },
+			{ player: 2, card: card('♥', '8') },
+			{ player: 3, card: card('♥', '9') },
+			{ player: 0, card: card('♥', 'A') } // Seat 0 wins with Ace
 		];
 
 		completeTrick(game);
 		// A(11) + 0 + 0 + 0 + 10 (last trick) = 21
-		// South is on north_south team
-		expect(game.round!.points.north_south).toBe(21);
+		// Seat 0 is on 'ns' team
+		expect(game.round!.points.ns).toBe(21);
 	});
 
 	it('should store hand snapshot for next trick', () => {
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♥', '10') },
-			{ player: 'north', card: card('♥', 'A') },
-			{ player: 'east', card: card('♥', 'K') },
-			{ player: 'south', card: card('♥', '7') }
+			{ player: 1, card: card('♥', '10') },
+			{ player: 2, card: card('♥', 'A') },
+			{ player: 3, card: card('♥', 'K') },
+			{ player: 0, card: card('♥', '7') }
 		];
 
 		completeTrick(game);
@@ -257,14 +257,14 @@ describe('completeTrick', () => {
 
 	it('should track tricks won by team', () => {
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♥', '10') },
-			{ player: 'north', card: card('♥', 'A') }, // North wins
-			{ player: 'east', card: card('♥', 'K') },
-			{ player: 'south', card: card('♥', '7') }
+			{ player: 1, card: card('♥', '10') },
+			{ player: 2, card: card('♥', 'A') }, // Seat 2 wins
+			{ player: 3, card: card('♥', 'K') },
+			{ player: 0, card: card('♥', '7') }
 		];
 
 		completeTrick(game);
-		expect(game.round!.tricksWon.north_south).toBe(1);
+		expect(game.round!.tricksWon.ns).toBe(1);
 	});
 });
 
@@ -278,50 +278,50 @@ describe('completeRound', () => {
 	});
 
 	it('should add round scores to game scores', () => {
-		game.round!.points = { north_south: 90, west_east: 72 };
-		game.round!.tricksWon = { north_south: 5, west_east: 3 };
-		game.round!.playingTeam = 'north_south';
+		game.round!.points = { ns: 90, we: 72 };
+		game.round!.tricksWon = { ns: 5, we: 3 };
+		game.round!.playingTeam = 'ns';
 
 		completeRound(game);
-		expect(game.scores.north_south).toBe(90);
-		expect(game.scores.west_east).toBe(72);
+		expect(game.scores.ns).toBe(90);
+		expect(game.scores.we).toBe(72);
 	});
 
 	it('should increment current round', () => {
-		game.round!.points = { north_south: 90, west_east: 72 };
-		game.round!.tricksWon = { north_south: 5, west_east: 3 };
-		game.round!.playingTeam = 'north_south';
+		game.round!.points = { ns: 90, we: 72 };
+		game.round!.tricksWon = { ns: 5, we: 3 };
+		game.round!.playingTeam = 'ns';
 
 		completeRound(game);
 		expect(game.currentRound).toBe(1);
 	});
 
 	it('should rotate dealer clockwise', () => {
-		game.round!.points = { north_south: 90, west_east: 72 };
-		game.round!.tricksWon = { north_south: 5, west_east: 3 };
-		game.round!.playingTeam = 'north_south';
+		game.round!.points = { ns: 90, we: 72 };
+		game.round!.tricksWon = { ns: 5, we: 3 };
+		game.round!.playingTeam = 'ns';
 
 		completeRound(game);
-		expect(game.dealer).toBe('west');
+		expect(game.dealer).toBe(1);
 	});
 
 	it('should handle nat (playing team fails)', () => {
-		game.round!.points = { north_south: 70, west_east: 92 };
-		game.round!.tricksWon = { north_south: 3, west_east: 5 };
-		game.round!.playingTeam = 'north_south'; // North-South is playing but only got 70
+		game.round!.points = { ns: 70, we: 92 };
+		game.round!.tricksWon = { ns: 3, we: 5 };
+		game.round!.playingTeam = 'ns'; // NS is playing but only got 70
 
 		completeRound(game);
-		expect(game.scores.north_south).toBe(0);
-		expect(game.scores.west_east).toBe(162);
+		expect(game.scores.ns).toBe(0);
+		expect(game.scores.we).toBe(162);
 	});
 
 	it('should handle pit', () => {
-		game.round!.points = { north_south: 0, west_east: 162 };
-		game.round!.tricksWon = { north_south: 0, west_east: 8 };
-		game.round!.playingTeam = 'west_east';
+		game.round!.points = { ns: 0, we: 162 };
+		game.round!.tricksWon = { ns: 0, we: 8 };
+		game.round!.playingTeam = 'we';
 
 		completeRound(game);
-		expect(game.scores.west_east).toBe(262); // 162 + 100 bonus
+		expect(game.scores.we).toBe(262); // 162 + 100 bonus
 	});
 });
 
@@ -343,17 +343,17 @@ describe('getGameResult', () => {
 	it('should return final scores and winner', () => {
 		const game = createGame();
 		game.currentRound = 16;
-		game.scores = { north_south: 1500, west_east: 1100 };
+		game.scores = { ns: 1500, we: 1100 };
 
 		const result = getGameResult(game);
-		expect(result.scores).toEqual({ north_south: 1500, west_east: 1100 });
-		expect(result.winner).toBe('north_south');
+		expect(result.scores).toEqual({ ns: 1500, we: 1100 });
+		expect(result.winner).toBe('ns');
 	});
 
 	it('should handle tie (unlikely but possible)', () => {
 		const game = createGame();
 		game.currentRound = 16;
-		game.scores = { north_south: 1300, west_east: 1300 };
+		game.scores = { ns: 1300, we: 1300 };
 
 		const result = getGameResult(game);
 		expect(result.winner).toBeNull();
@@ -361,63 +361,63 @@ describe('getGameResult', () => {
 });
 
 describe('game flow', () => {
-	it('should have first dealer as South', () => {
+	it('should have first dealer as seat 0', () => {
 		const game = createGame();
-		expect(game.dealer).toBe('south');
+		expect(game.dealer).toBe(0);
 	});
 
-	it('should have first trump chooser as West (left of dealer)', () => {
+	it('should have first trump chooser as seat 1 (left of dealer)', () => {
 		const game = createGame();
 		game.round = startRound(game);
-		expect(game.round.trumpChooser).toBe('west');
+		expect(game.round.trumpChooser).toBe(1);
 	});
 
-	it('should rotate dealer: south -> west -> north -> east -> south', () => {
+	it('should rotate dealer: 0 -> 1 -> 2 -> 3 -> 0', () => {
 		const game = createGame();
 
 		// Round 1
 		game.round = startRound(game);
 		chooseTrump(game, '♠');
-		game.round.points = { north_south: 82, west_east: 80 };
-		game.round.tricksWon = { north_south: 4, west_east: 4 };
-		game.round.playingTeam = 'north_south';
+		game.round.points = { ns: 82, we: 80 };
+		game.round.tricksWon = { ns: 4, we: 4 };
+		game.round.playingTeam = 'ns';
 		completeRound(game);
-		expect(game.dealer).toBe('west');
+		expect(game.dealer).toBe(1);
 
 		// Round 2
 		game.round = startRound(game);
-		expect(game.round.trumpChooser).toBe('north');
+		expect(game.round.trumpChooser).toBe(2);
 		chooseTrump(game, '♥');
-		game.round.points = { north_south: 80, west_east: 82 };
-		game.round.tricksWon = { north_south: 4, west_east: 4 };
-		game.round.playingTeam = 'north_south';
+		game.round.points = { ns: 80, we: 82 };
+		game.round.tricksWon = { ns: 4, we: 4 };
+		game.round.playingTeam = 'ns';
 		completeRound(game);
-		expect(game.dealer).toBe('north');
+		expect(game.dealer).toBe(2);
 
 		// Round 3
 		game.round = startRound(game);
-		expect(game.round.trumpChooser).toBe('east');
+		expect(game.round.trumpChooser).toBe(3);
 	});
 });
 
 describe('position helpers', () => {
-	it('should correctly identify team for each position', () => {
+	it('should correctly identify team for each seat', () => {
 		const game = createGame();
 		game.round = startRound(game);
 		chooseTrump(game, '♠');
 
-		// North and South are on the same team
+		// Seats 0 and 2 are on the same team (ns)
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♥', '10') },
-			{ player: 'north', card: card('♥', 'A') },
-			{ player: 'east', card: card('♥', 'K') },
-			{ player: 'south', card: card('♥', '7') }
+			{ player: 1, card: card('♥', '10') },
+			{ player: 2, card: card('♥', 'A') },
+			{ player: 3, card: card('♥', 'K') },
+			{ player: 0, card: card('♥', '7') }
 		];
 
 		completeTrick(game);
-		// North won, so north_south team gets the points
-		expect(game.round!.tricksWon.north_south).toBe(1);
-		expect(game.round!.tricksWon.west_east).toBe(0);
+		// Seat 2 won, so ns team gets the points
+		expect(game.round!.tricksWon.ns).toBe(1);
+		expect(game.round!.tricksWon.we).toBe(0);
 	});
 });
 
@@ -433,105 +433,105 @@ describe('callVerzaakt', () => {
 	it('should detect verzaakt when player did not follow suit', () => {
 		// Force specific hands for testing
 		game.round!.hands = {
-			south: [card('♠', '7'), card('♥', 'A')],
-			west: [card('♠', '10'), card('♥', 'K')],
-			north: [card('♠', 'K'), card('♥', 'Q')],
-			east: [card('♠', 'A'), card('♥', 'J')]
+			0: [card('♠', '7'), card('♥', 'A')],
+			1: [card('♠', '10'), card('♥', 'K')],
+			2: [card('♠', 'K'), card('♥', 'Q')],
+			3: [card('♠', 'A'), card('♥', 'J')]
 		};
 
 		// Store snapshot at start of this trick
 		game.round!.handSnapshots[0] = {
-			south: [card('♠', '7'), card('♥', 'A')],
-			west: [card('♠', '10'), card('♥', 'K')],
-			north: [card('♠', 'K'), card('♥', 'Q')],
-			east: [card('♠', 'A'), card('♥', 'J')]
+			0: [card('♠', '7'), card('♥', 'A')],
+			1: [card('♠', '10'), card('♥', 'K')],
+			2: [card('♠', 'K'), card('♥', 'Q')],
+			3: [card('♠', 'A'), card('♥', 'J')]
 		};
 
-		// Play trick where South plays illegally - put in currentTrick
+		// Play trick where seat 0 plays illegally - put in currentTrick
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♠', '10') },
-			{ player: 'north', card: card('♠', 'K') },
-			{ player: 'east', card: card('♠', 'A') },
-			{ player: 'south', card: card('♥', 'A') } // Illegal! Has ♠7
+			{ player: 1, card: card('♠', '10') },
+			{ player: 2, card: card('♠', 'K') },
+			{ player: 3, card: card('♠', 'A') },
+			{ player: 0, card: card('♥', 'A') } // Illegal! Has ♠7
 		];
 
-		const result = callVerzaakt(game, 'north'); // North calls verzaakt
+		const result = callVerzaakt(game, 2); // Seat 2 calls verzaakt
 		expect(result.verzaaktFound).toBe(true);
-		expect(result.guiltyPlayer).toBe('south');
-		expect(result.guiltyTeam).toBe('north_south');
+		expect(result.guiltyPlayer).toBe(0);
+		expect(result.guiltyTeam).toBe('ns');
 	});
 
 	it('should reject verzaakt call when no illegal moves', () => {
 		game.round!.hands = {
-			south: [card('♠', '7'), card('♥', 'A')],
-			west: [card('♠', '10'), card('♥', 'K')],
-			north: [card('♠', 'K'), card('♥', 'Q')],
-			east: [card('♠', 'A'), card('♥', 'J')]
+			0: [card('♠', '7'), card('♥', 'A')],
+			1: [card('♠', '10'), card('♥', 'K')],
+			2: [card('♠', 'K'), card('♥', 'Q')],
+			3: [card('♠', 'A'), card('♥', 'J')]
 		};
 
 		game.round!.handSnapshots[0] = {
-			south: [card('♠', '7'), card('♥', 'A')],
-			west: [card('♠', '10'), card('♥', 'K')],
-			north: [card('♠', 'K'), card('♥', 'Q')],
-			east: [card('♠', 'A'), card('♥', 'J')]
+			0: [card('♠', '7'), card('♥', 'A')],
+			1: [card('♠', '10'), card('♥', 'K')],
+			2: [card('♠', 'K'), card('♥', 'Q')],
+			3: [card('♠', 'A'), card('♥', 'J')]
 		};
 
 		// All legal plays - in currentTrick
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♠', '10') },
-			{ player: 'north', card: card('♠', 'K') },
-			{ player: 'east', card: card('♠', 'A') },
-			{ player: 'south', card: card('♠', '7') }
+			{ player: 1, card: card('♠', '10') },
+			{ player: 2, card: card('♠', 'K') },
+			{ player: 3, card: card('♠', 'A') },
+			{ player: 0, card: card('♠', '7') }
 		];
 
-		const result = callVerzaakt(game, 'east');
+		const result = callVerzaakt(game, 3);
 		expect(result.verzaaktFound).toBe(false);
 	});
 
 	it('should identify first illegal move when multiple exist', () => {
 		game.round!.handSnapshots[0] = {
-			south: [card('♠', '7'), card('♥', 'A')],
-			west: [card('♠', '10'), card('♥', 'K')],
-			north: [card('♠', 'K'), card('♥', 'Q')],
-			east: [card('♠', 'A'), card('♥', 'J')]
+			0: [card('♠', '7'), card('♥', 'A')],
+			1: [card('♠', '10'), card('♥', 'K')],
+			2: [card('♠', 'K'), card('♥', 'Q')],
+			3: [card('♠', 'A'), card('♥', 'J')]
 		};
 
-		// Both North and South play illegally, but North first - in currentTrick
+		// Both seat 2 and seat 0 play illegally, but seat 2 first - in currentTrick
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♠', '10') },
-			{ player: 'north', card: card('♥', 'Q') }, // First illegal! Has ♠K
-			{ player: 'east', card: card('♠', 'A') },
-			{ player: 'south', card: card('♥', 'A') } // Also illegal but second
+			{ player: 1, card: card('♠', '10') },
+			{ player: 2, card: card('♥', 'Q') }, // First illegal! Has ♠K
+			{ player: 3, card: card('♠', 'A') },
+			{ player: 0, card: card('♥', 'A') } // Also illegal but second
 		];
 
-		const result = callVerzaakt(game, 'east');
+		const result = callVerzaakt(game, 3);
 		expect(result.verzaaktFound).toBe(true);
-		expect(result.guiltyPlayer).toBe('north'); // North was first
-		expect(result.guiltyTeam).toBe('north_south');
+		expect(result.guiltyPlayer).toBe(2); // Seat 2 was first
+		expect(result.guiltyTeam).toBe('ns');
 	});
 
 	it('should require at least 2 cards in current trick to call verzaakt', () => {
 		// Only 1 card played
-		game.round!.currentTrick = [{ player: 'west', card: card('♠', '10') }];
+		game.round!.currentTrick = [{ player: 1, card: card('♠', '10') }];
 
-		expect(() => callVerzaakt(game, 'north')).toThrow();
+		expect(() => callVerzaakt(game, 2)).toThrow();
 	});
 
 	it('should allow verzaakt call after 2 cards played', () => {
 		game.round!.handSnapshots[0] = {
-			south: [card('♠', '7'), card('♥', 'A')],
-			west: [card('♠', '10'), card('♥', 'K')],
-			north: [card('♥', 'Q')], // No spades!
-			east: [card('♠', 'A'), card('♥', 'J')]
+			0: [card('♠', '7'), card('♥', 'A')],
+			1: [card('♠', '10'), card('♥', 'K')],
+			2: [card('♥', 'Q')], // No spades!
+			3: [card('♠', 'A'), card('♥', 'J')]
 		};
 
 		game.round!.currentTrick = [
-			{ player: 'west', card: card('♠', '10') },
-			{ player: 'north', card: card('♥', 'Q') } // Legal - has no spades
+			{ player: 1, card: card('♠', '10') },
+			{ player: 2, card: card('♥', 'Q') } // Legal - has no spades
 		];
 
 		// Should not throw
-		const result = callVerzaakt(game, 'east');
+		const result = callVerzaakt(game, 3);
 		expect(result.verzaaktFound).toBe(false);
 	});
 });

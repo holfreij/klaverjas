@@ -12,6 +12,7 @@ import {
 } from 'firebase/database';
 import { getFirebaseDatabase } from './firebase';
 import { generateLobbyCode, validatePlayerName, getNewHost } from './lobby';
+import { initializeGame } from './gameService';
 import type { Lobby, Player, Seat, PlayerSeat, SessionData } from './types';
 
 const SESSION_STORAGE_KEY = 'klaverjas_session';
@@ -390,6 +391,10 @@ export async function startGame(
 		}
 
 		await update(lobbyRef, { status: 'playing' });
+
+		// Initialize game state (deal cards, set trump chooser)
+		await initializeGame(lobbyCode);
+
 		return { success: true };
 	} catch (error) {
 		console.error('Failed to start game:', error);

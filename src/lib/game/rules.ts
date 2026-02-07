@@ -1,9 +1,8 @@
 import type { Card, Suit, Rank, Hand } from './deck';
-
-export type Position = 'south' | 'west' | 'north' | 'east';
+import type { PlayerSeat } from '$lib/multiplayer/types';
 
 export interface PlayedMove {
-	player: Position;
+	player: PlayerSeat;
 	card: Card;
 	trickNumber: number;
 }
@@ -128,7 +127,7 @@ export function determineTrickWinner(trick: Card[], trumpSuit: Suit): number {
 
 export function checkAllMovesInRound(
 	playedMoves: PlayedMove[],
-	handSnapshots: Record<number, Record<Position, Hand>>,
+	handSnapshots: Record<number, Record<PlayerSeat, Hand>>,
 	trumpSuit: Suit
 ): IllegalMove[] {
 	const illegalMoves: IllegalMove[] = [];

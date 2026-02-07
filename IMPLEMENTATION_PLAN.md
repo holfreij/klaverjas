@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Current stage: **Stage 4A - Card Visuals**
+Current stage: **Stage 4D - Roem & Verzaakt**
 
 See [plans/roadmap.md](plans/roadmap.md) for the full project roadmap.
 
@@ -151,14 +151,21 @@ Card rendering: Simple CSS-based cards with suit symbols (can upgrade to CardMei
 - [x] **OrientationCheck component** - show rotate instruction if portrait
 - [x] **Roem/Verzaakt buttons** - near hand, enable/disable logic (stubs for 4D)
 
-### Stage 4C - Game State Sync (next)
+### Stage 4C - Game State Sync - COMPLETED
 
-- [ ] **Firebase game state schema** - extend lobby with game state
-- [ ] **Trump selection phase** - first player chooses trump (mandatory)
-- [ ] **Card playing** - sync played cards to Firebase
-- [ ] **Trick completion** - detect 4 cards, determine winner, award points
-- [ ] **Round progression** - 8 tricks per round, calculate scores
-- [ ] **Private hand view** - only show player's own cards
+- [x] **Game engine type refactor** - Position→PlayerSeat (0-3), Team→'ns'/'we'
+- [x] **State conversion utilities** (`src/lib/multiplayer/gameStateConverter.ts`) - bidirectional engine↔multiplayer conversion (17 tests)
+- [x] **Game service** (`src/lib/multiplayer/gameService.ts`) - Firebase game actions: initializeGame, chooseTrump, playCard, completeTrick, startNextRound (17 integration tests)
+- [x] **Trump selection UI** (`src/lib/components/TrumpSelector.svelte`) - modal with 4 suit buttons, waiting state (10 tests)
+- [x] **Game view wiring** (`src/lib/components/GameView.svelte`) - connects GameTable to live Firebase data
+- [x] **Page routing** - HomePage → LobbyRoom → GameView based on lobby status
+- [x] **Trick completion with delay** - 1.5s display before auto-completing trick
+- [x] **Round progression** - 3s round-end display, auto-advance to next round
+- [x] **Round end display** - shows round scores, team totals
+- [x] **Game end display** - final scores and winner announcement
+- [x] **startGame integration** - host clicking "Start spel" now deals cards and enters trump phase
+
+**Test Results: 471 tests passing**
 
 ### Stage 4D - Roem & Verzaakt
 
