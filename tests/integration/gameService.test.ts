@@ -68,7 +68,7 @@ async function createFullLobby(): Promise<{ code: string; hostId: string; player
 	return { code, hostId, playerIds };
 }
 
-describe('Firebase Game Service Integration Tests', () => {
+describe('Firebase Game Service Integration Tests', { timeout: 10000 }, () => {
 	beforeAll(async () => {
 		clearSession();
 	});

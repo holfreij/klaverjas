@@ -64,6 +64,13 @@ npx playwright test --reporter=line                    # Concise output with car
 - **2-trick test** (~30s): Lobby setup, trump selection, play 2 tricks, verify game state
 - **Full round test** (~90s): Play all 8 tricks, verify round end and transition to round 2
 
+To watch the tests visually, use `--headed` (opens 4 browser windows, one per player — tile them in a 2x2 grid) or `--ui` (Playwright's built-in inspector with tabs and step-by-step controls):
+
+```bash
+npx playwright test tests/e2e/full-game.spec.ts --headed   # 4 visible browser windows
+npx playwright test --ui                                     # Playwright Inspector UI
+```
+
 ### Pre-commit checks
 
 The pre-commit hook runs all of the above automatically: type checking → linting → formatting → unit/integration tests. E2E tests are not included in pre-commit (too slow).
