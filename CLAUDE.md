@@ -35,6 +35,39 @@ npm run test:e2e     # Run E2E tests (Playwright)
 npm run check        # TypeScript/Svelte type checking
 ```
 
+## Running Tests
+
+### Unit + integration tests (Vitest)
+
+```bash
+npm run test                    # Run all 471 tests
+npm run test -- --grep "roem"   # Run tests matching a pattern
+npm run test:watch              # Watch mode (re-runs on file changes)
+```
+
+Integration tests (`tests/integration/`) hit real Firebase — no mocking. Some tests need up to 30s for full-round plays.
+
+### E2E tests (Playwright)
+
+E2E tests use real browsers and a running dev server. The dev server starts automatically.
+
+```bash
+npm run test:e2e                                       # Run all E2E tests (lobby + full game)
+npx playwright test tests/e2e/lobby.spec.ts            # Lobby tests only (~45s)
+npx playwright test tests/e2e/full-game.spec.ts        # Full game tests only (~2min)
+npx playwright test -g "4 players join"                # Run a specific test by name
+npx playwright test --reporter=line                    # Concise output with card-by-card log
+```
+
+**Full game E2E tests** (`tests/e2e/full-game.spec.ts`) spin up 4 browser contexts simulating 4 players. They exercise the complete flow: create lobby → join → start game → choose trump → play cards → complete tricks → round transition. These are the closest thing to a live demo:
+
+- **2-trick test** (~30s): Lobby setup, trump selection, play 2 tricks, verify game state
+- **Full round test** (~90s): Play all 8 tricks, verify round end and transition to round 2
+
+### Pre-commit checks
+
+The pre-commit hook runs all of the above automatically: type checking → linting → formatting → unit/integration tests. E2E tests are not included in pre-commit (too slow).
+
 ## Project Structure
 
 ```
