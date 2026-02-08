@@ -40,7 +40,7 @@ npm run check        # TypeScript/Svelte type checking
 ### Unit + integration tests (Vitest)
 
 ```bash
-npm run test                    # Run all 471 tests
+npm run test                    # Run all tests
 npm run test -- --grep "roem"   # Run tests matching a pattern
 npm run test:watch              # Watch mode (re-runs on file changes)
 ```

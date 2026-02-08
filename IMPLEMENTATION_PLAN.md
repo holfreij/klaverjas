@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Current stage: **Stage 4D - Roem & Verzaakt**
+Current stage: **Stage 4E - Round/Game Flow**
 
 See [plans/roadmap.md](plans/roadmap.md) for the full project roadmap.
 
@@ -159,22 +159,23 @@ Card rendering: Simple CSS-based cards with suit symbols (can upgrade to CardMei
 - [x] **Trump selection UI** (`src/lib/components/TrumpSelector.svelte`) - modal with 4 suit buttons, waiting state (10 tests)
 - [x] **Game view wiring** (`src/lib/components/GameView.svelte`) - connects GameTable to live Firebase data
 - [x] **Page routing** - HomePage → LobbyRoom → GameView based on lobby status
-- [x] **Trick completion with delay** - 1.5s display before auto-completing trick
+- [x] **Trick flow** - cards stay on table during `trickEnd`; trick winner plays next card to clear; 8th trick uses 2.5s auto-timer
 - [x] **Round progression** - 3s round-end display, auto-advance to next round
 - [x] **Round end display** - shows round scores, team totals
 - [x] **Game end display** - final scores and winner announcement
 - [x] **startGame integration** - host clicking "Start spel" now deals cards and enters trump phase
 
-**Test Results: 471 tests passing**
+**Test Results: 502 tests passing**
 
-### Stage 4D - Roem & Verzaakt
+### Stage 4D - Roem & Verzaakt - COMPLETED
 
-- [ ] **Roem button** - enabled after card played, disabled after claim
-- [ ] **Roem claim modal** - point value selection (20/40/50/70/100)
-- [ ] **Roem validation** - system verifies, show success/error
-- [ ] **Verzaakt button** - enabled after card played
-- [ ] **Verzaakt accusation** - player selection modal
-- [ ] **Verzaakt verification** - check all moves in round, end round if illegal found
+- [x] **Roem button** - enabled during `playing`/`trickEnd` when cards in trick and not yet claimed
+- [x] **Roem claim** - auto-detects roem points, stores as pending until trick completion
+- [x] **Roem validation** - system auto-validates, shows roemClaimed or roemRejected notification
+- [x] **Verzaakt button** - enabled during `playing`/`trickEnd` when ≥2 cards in trick
+- [x] **Verzaakt verification** - engine checks all moves in round, ends round if illegal found
+- [x] **GameNotification component** - shows roem claimed/rejected, verzaakt found/not found
+- [x] **Demo page** - 4 roem scenarios (3-sequence, 4-sequence, stuk, four-of-a-kind)
 
 ### Stage 4E - Round/Game Flow
 
