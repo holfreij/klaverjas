@@ -184,14 +184,11 @@ test.describe('Full Game E2E', () => {
 				await pages[0].waitForTimeout(800);
 			}
 
-			// All 4 cards played — verify trick area shows 4 cards
+			// All 4 cards played — cards stay on table during trickEnd
 			const trickCards = pages[0].locator('[data-testid="trick-area"] [data-testid="card"]');
-			// The trick might already be clearing, so allow 0 or 4
-			const trickCardCount = await trickCards.count();
-			expect([0, 4]).toContain(trickCardCount);
+			await expect(trickCards).toHaveCount(4, { timeout: 5000 });
 
-			// Wait for trick auto-completion (1.5s timer + buffer)
-			await pages[0].waitForTimeout(3000);
+			// Trick winner plays next card, which clears the trick — no timer wait needed
 		}
 
 		// ── Step 6: Verify game state after 2 tricks ──
@@ -257,12 +254,12 @@ test.describe('Full Game E2E', () => {
 				await pages[0].waitForTimeout(800);
 			}
 
-			// Wait for trick completion (1.5s timer + buffer)
-			await pages[0].waitForTimeout(3000);
+			// For tricks 1-7: cards stay on table, trick winner plays next (no wait needed).
+			// For trick 8: 2.5s auto-timer completes the trick, then 3s roundEnd timer.
+			if (trick === 8) {
+				// Wait for 8th trick auto-completion (2.5s) + round end display (3s) + buffer
+				await expect(pages[0].locator('text=Ronde 2 van 16')).toBeVisible({ timeout: 20000 });
+			}
 		}
-
-		// After 8 tricks: trick completes (1.5s) → round end (3s) → next round
-		// Should eventually reach round 2
-		await expect(pages[0].locator('text=Ronde 2 van 16')).toBeVisible({ timeout: 20000 });
 	});
 });

@@ -82,6 +82,8 @@ export function engineToMultiplayer(
 		gameScores: { ...engine.scores },
 		roemClaimed: false,
 		roemClaimPending: null,
+		roemPointsPending: 0,
+		lastNotification: null,
 		skipVotes: []
 	};
 }

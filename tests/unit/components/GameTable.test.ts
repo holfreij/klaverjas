@@ -50,6 +50,8 @@ function createTestGameState(overrides: Partial<GameState> = {}): GameState {
 		},
 		roemClaimed: false,
 		roemClaimPending: null,
+		roemPointsPending: 0,
+		lastNotification: null,
 		skipVotes: [],
 		...overrides
 	};
@@ -259,6 +261,76 @@ describe('GameTable', () => {
 		});
 	});
 
+	describe('trickEnd phase', () => {
+		it('should show 4 cards in trick area during trickEnd', () => {
+			const gameState = createTestGameState({
+				phase: 'trickEnd',
+				currentTrick: [
+					{ card: { suit: '♠', rank: 'A' }, seat: 0 },
+					{ card: { suit: '♠', rank: 'K' }, seat: 1 },
+					{ card: { suit: '♠', rank: '10' }, seat: 2 },
+					{ card: { suit: '♠', rank: 'Q' }, seat: 3 }
+				],
+				currentPlayer: 0
+			});
+			render(GameTable, { props: { ...defaultProps, gameState } });
+
+			const trickArea = screen.getByTestId('trick-area');
+			const cards = trickArea.querySelectorAll('[data-testid="card"]');
+			expect(cards).toHaveLength(4);
+		});
+
+		it('should enable Roem button during trickEnd when not yet claimed', () => {
+			const gameState = createTestGameState({
+				phase: 'trickEnd',
+				currentTrick: [
+					{ card: { suit: '♠', rank: 'A' }, seat: 0 },
+					{ card: { suit: '♠', rank: 'K' }, seat: 1 },
+					{ card: { suit: '♠', rank: '10' }, seat: 2 },
+					{ card: { suit: '♠', rank: 'Q' }, seat: 3 }
+				],
+				roemClaimed: false,
+				currentPlayer: 0
+			});
+			render(GameTable, { props: { ...defaultProps, gameState } });
+
+			expect(screen.getByTestId('roem-button')).toBeEnabled();
+		});
+
+		it('should enable Verzaakt button during trickEnd', () => {
+			const gameState = createTestGameState({
+				phase: 'trickEnd',
+				currentTrick: [
+					{ card: { suit: '♠', rank: 'A' }, seat: 0 },
+					{ card: { suit: '♠', rank: 'K' }, seat: 1 },
+					{ card: { suit: '♠', rank: '10' }, seat: 2 },
+					{ card: { suit: '♠', rank: 'Q' }, seat: 3 }
+				],
+				currentPlayer: 0
+			});
+			render(GameTable, { props: { ...defaultProps, gameState } });
+
+			expect(screen.getByTestId('verzaakt-button')).toBeEnabled();
+		});
+
+		it('should highlight trick winner during trickEnd', () => {
+			const gameState = createTestGameState({
+				phase: 'trickEnd',
+				currentTrick: [
+					{ card: { suit: '♠', rank: 'A' }, seat: 0 },
+					{ card: { suit: '♠', rank: 'K' }, seat: 1 },
+					{ card: { suit: '♠', rank: '10' }, seat: 2 },
+					{ card: { suit: '♠', rank: 'Q' }, seat: 3 }
+				],
+				currentPlayer: 2 // Partner is trick winner
+			});
+			render(GameTable, { props: { ...defaultProps, gameState } });
+
+			const partnerArea = screen.getByTestId('player-top');
+			expect(partnerArea).toHaveClass('ring-amber-400');
+		});
+	});
+
 	describe('action buttons', () => {
 		it('should show Roem button', () => {
 			render(GameTable, { props: defaultProps });
@@ -295,9 +367,21 @@ describe('GameTable', () => {
 			expect(screen.getByTestId('roem-button')).toBeEnabled();
 		});
 
-		it('should enable Verzaakt button when cards are in trick', () => {
+		it('should keep Verzaakt button disabled when only 1 card in trick', () => {
 			const gameState = createTestGameState({
 				currentTrick: [{ card: { suit: '♠', rank: 'A' }, seat: 1 }]
+			});
+			render(GameTable, { props: { ...defaultProps, gameState } });
+
+			expect(screen.getByTestId('verzaakt-button')).toBeDisabled();
+		});
+
+		it('should enable Verzaakt button when >= 2 cards are in trick', () => {
+			const gameState = createTestGameState({
+				currentTrick: [
+					{ card: { suit: '♠', rank: 'A' }, seat: 1 },
+					{ card: { suit: '♥', rank: 'K' }, seat: 2 }
+				]
 			});
 			render(GameTable, { props: { ...defaultProps, gameState } });
 

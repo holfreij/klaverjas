@@ -69,7 +69,7 @@
 	// Roem and Verzaakt are only enabled after at least one card is played
 	let hasCardsInTrick = $derived(currentTrick.length > 0);
 	let canClaimRoem = $derived(hasCardsInTrick && !gameState.roemClaimed);
-	let canCallVerzaakt = $derived(hasCardsInTrick);
+	let canCallVerzaakt = $derived(currentTrick.length >= 2);
 </script>
 
 <div

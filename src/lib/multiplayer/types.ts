@@ -55,6 +55,20 @@ export interface RoemClaimPending {
 	amount: number;
 }
 
+export type NotificationType =
+	| 'roemClaimed'
+	| 'roemRejected'
+	| 'verzaaktFound'
+	| 'verzaaktNotFound';
+
+export interface GameNotification {
+	type: NotificationType;
+	team?: Team;
+	playerSeat?: PlayerSeat;
+	points?: number;
+	timestamp: number;
+}
+
 export interface TeamScore {
 	base: number;
 	roem: number;
@@ -82,7 +96,9 @@ export interface GameState {
 
 	roemClaimed: boolean;
 	roemClaimPending: RoemClaimPending | null;
+	roemPointsPending: number;
 
+	lastNotification: GameNotification | null;
 	skipVotes: string[]; // player IDs who tapped to skip round-end display
 }
 

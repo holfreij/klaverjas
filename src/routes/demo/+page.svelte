@@ -39,30 +39,128 @@
 
 	const allHands = dealHands(shuffleDeck(createDeck()));
 
-	const demoGameState: GameState = {
-		phase: 'playing',
-		round: 3,
-		trick: 2,
-		dealer: 0,
-		trump: '♥',
-		trumpChooser: 0,
-		playingTeam: 'ns',
-		currentPlayer: 0,
-		handsAtTrickStart: { 0: allHands[0], 1: allHands[1], 2: allHands[2], 3: allHands[3] },
-		hands: { 0: allHands[0], 1: allHands[1], 2: allHands[2], 3: allHands[3] },
-		currentTrick: [
-			{ card: { suit: '♠', rank: 'K' }, seat: 0 },
-			{ card: { suit: '♠', rank: '10' }, seat: 1 },
-			{ card: { suit: '♠', rank: 'Q' }, seat: 2 },
-			{ card: { suit: '♠', rank: 'J' }, seat: 3 }
-		],
-		completedTricks: [],
-		scores: { ns: { base: 42, roem: 20 }, we: { base: 38, roem: 0 } },
-		gameScores: { ns: 245, we: 198 },
-		roemClaimed: false,
-		roemClaimPending: null,
-		skipVotes: []
-	};
+	// Demo scenarios cycling through different roem tricks
+	const demoScenarios: { name: string; state: GameState }[] = [
+		{
+			name: '3-reeks (Q-K-A ♠) — 20 roem',
+			state: {
+				phase: 'trickEnd',
+				round: 3,
+				trick: 2,
+				dealer: 0,
+				trump: '♥',
+				trumpChooser: 0,
+				playingTeam: 'ns',
+				currentPlayer: 0,
+				handsAtTrickStart: { 0: allHands[0], 1: allHands[1], 2: allHands[2], 3: allHands[3] },
+				hands: { 0: allHands[0], 1: allHands[1], 2: allHands[2], 3: allHands[3] },
+				currentTrick: [
+					{ card: { suit: '♠', rank: 'Q' }, seat: 1 },
+					{ card: { suit: '♠', rank: 'K' }, seat: 2 },
+					{ card: { suit: '♠', rank: 'A' }, seat: 0 },
+					{ card: { suit: '♣', rank: '7' }, seat: 3 }
+				],
+				completedTricks: [],
+				scores: { ns: { base: 42, roem: 0 }, we: { base: 38, roem: 0 } },
+				gameScores: { ns: 245, we: 198 },
+				roemClaimed: false,
+				roemClaimPending: null,
+				roemPointsPending: 0,
+				lastNotification: null,
+				skipVotes: []
+			}
+		},
+		{
+			name: '4-reeks (J-Q-K-A ♦) — 50 roem',
+			state: {
+				phase: 'trickEnd',
+				round: 5,
+				trick: 4,
+				dealer: 2,
+				trump: '♠',
+				trumpChooser: 3,
+				playingTeam: 'we',
+				currentPlayer: 2,
+				handsAtTrickStart: { 0: allHands[0], 1: allHands[1], 2: allHands[2], 3: allHands[3] },
+				hands: { 0: allHands[0], 1: allHands[1], 2: allHands[2], 3: allHands[3] },
+				currentTrick: [
+					{ card: { suit: '♦', rank: 'J' }, seat: 3 },
+					{ card: { suit: '♦', rank: 'Q' }, seat: 0 },
+					{ card: { suit: '♦', rank: 'K' }, seat: 1 },
+					{ card: { suit: '♦', rank: 'A' }, seat: 2 }
+				],
+				completedTricks: [],
+				scores: { ns: { base: 20, roem: 0 }, we: { base: 55, roem: 20 } },
+				gameScores: { ns: 310, we: 280 },
+				roemClaimed: false,
+				roemClaimPending: null,
+				roemPointsPending: 0,
+				lastNotification: null,
+				skipVotes: []
+			}
+		},
+		{
+			name: 'Stuk (K+Q ♥ troef) — 20 roem',
+			state: {
+				phase: 'trickEnd',
+				round: 1,
+				trick: 3,
+				dealer: 0,
+				trump: '♥',
+				trumpChooser: 1,
+				playingTeam: 'we',
+				currentPlayer: 1,
+				handsAtTrickStart: { 0: allHands[0], 1: allHands[1], 2: allHands[2], 3: allHands[3] },
+				hands: { 0: allHands[0], 1: allHands[1], 2: allHands[2], 3: allHands[3] },
+				currentTrick: [
+					{ card: { suit: '♥', rank: 'K' }, seat: 1 },
+					{ card: { suit: '♥', rank: 'Q' }, seat: 2 },
+					{ card: { suit: '♣', rank: '9' }, seat: 3 },
+					{ card: { suit: '♣', rank: '8' }, seat: 0 }
+				],
+				completedTricks: [],
+				scores: { ns: { base: 10, roem: 0 }, we: { base: 30, roem: 0 } },
+				gameScores: { ns: 120, we: 155 },
+				roemClaimed: false,
+				roemClaimPending: null,
+				roemPointsPending: 0,
+				lastNotification: null,
+				skipVotes: []
+			}
+		},
+		{
+			name: 'Vier gelijke (4x Boer) — 100 roem',
+			state: {
+				phase: 'trickEnd',
+				round: 8,
+				trick: 6,
+				dealer: 1,
+				trump: '♣',
+				trumpChooser: 2,
+				playingTeam: 'ns',
+				currentPlayer: 3,
+				handsAtTrickStart: { 0: allHands[0], 1: allHands[1], 2: allHands[2], 3: allHands[3] },
+				hands: { 0: allHands[0], 1: allHands[1], 2: allHands[2], 3: allHands[3] },
+				currentTrick: [
+					{ card: { suit: '♠', rank: 'J' }, seat: 0 },
+					{ card: { suit: '♥', rank: 'J' }, seat: 1 },
+					{ card: { suit: '♣', rank: 'J' }, seat: 2 },
+					{ card: { suit: '♦', rank: 'J' }, seat: 3 }
+				],
+				completedTricks: [],
+				scores: { ns: { base: 80, roem: 20 }, we: { base: 60, roem: 0 } },
+				gameScores: { ns: 520, we: 490 },
+				roemClaimed: false,
+				roemClaimPending: null,
+				roemPointsPending: 0,
+				lastNotification: null,
+				skipVotes: []
+			}
+		}
+	];
+
+	let currentScenario = $state(0);
+	let demoGameState = $derived(demoScenarios[currentScenario].state);
 </script>
 
 <div class="min-h-screen bg-green-900 p-8">
@@ -148,12 +246,27 @@
 
 	<!-- GameTable toggle -->
 	<div class="mb-8">
-		<button
-			onclick={() => (showGameTable = !showGameTable)}
-			class="rounded bg-yellow-500 px-6 py-3 font-bold text-green-900 hover:bg-yellow-400"
-		>
-			{showGameTable ? 'Verberg Speltafel' : 'Toon Speltafel Demo'}
-		</button>
+		<div class="mb-2 flex items-center gap-4">
+			<button
+				onclick={() => (showGameTable = !showGameTable)}
+				class="rounded bg-yellow-500 px-6 py-3 font-bold text-green-900 hover:bg-yellow-400"
+			>
+				{showGameTable ? 'Verberg Speltafel' : 'Toon Speltafel Demo'}
+			</button>
+		</div>
+		<div class="flex flex-wrap items-center gap-2">
+			{#each demoScenarios as scenario, i (i)}
+				<button
+					data-scenario={i}
+					onclick={() => (currentScenario = i)}
+					class="rounded px-3 py-2 text-sm {currentScenario === i
+						? 'bg-amber-500 font-bold text-green-900'
+						: 'bg-green-700 text-white hover:bg-green-600'}"
+				>
+					{scenario.name}
+				</button>
+			{/each}
+		</div>
 	</div>
 </div>
 

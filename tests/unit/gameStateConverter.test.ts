@@ -90,6 +90,8 @@ function createMultiplayerGameState(): MultiplayerGameState {
 		gameScores: { ns: 100, we: 80 },
 		roemClaimed: false,
 		roemClaimPending: null,
+		roemPointsPending: 0,
+		lastNotification: null,
 		skipVotes: []
 	};
 }
@@ -166,6 +168,8 @@ describe('engineToMultiplayer', () => {
 
 		expect(result.roemClaimed).toBe(false);
 		expect(result.roemClaimPending).toBeNull();
+		expect(result.roemPointsPending).toBe(0);
+		expect(result.lastNotification).toBeNull();
 		expect(result.skipVotes).toEqual([]);
 	});
 

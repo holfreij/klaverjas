@@ -4,11 +4,14 @@
 		chooseTrump,
 		playCard,
 		completeTrick,
-		startNextRound
+		startNextRound,
+		claimRoem,
+		callVerzaakt
 	} from '$lib/multiplayer/gameService';
 	import type { Card } from '$lib/game/deck';
 	import type { PlayerSeat } from '$lib/multiplayer/types';
 	import GameTable from './GameTable.svelte';
+	import GameNotification from './GameNotification.svelte';
 	import TrumpSelector from './TrumpSelector.svelte';
 
 	let gameState = $derived(lobbyStore.lobby?.game);
@@ -29,32 +32,33 @@
 		return player?.name ?? '?';
 	});
 
-	// Track trick length to detect when all 4 cards are played
-	let trickLength = $derived((gameState?.currentTrick ?? []).length);
-	let trickCompleteTimer: ReturnType<typeof setTimeout> | null = null;
-	let trickCompleteFired = false;
+	// Track phase for timers
+	let currentPhase = $derived(gameState?.phase);
+
+	// 8th trick auto-completion: no next trick to trigger completion,
+	// so a 2.5s timer handles it (gives time for roem claims)
+	let currentTrickNum = $derived(gameState?.trick ?? 0);
+	let trick8Timer: ReturnType<typeof setTimeout> | null = null;
+	let trick8Fired = false;
 
 	$effect(() => {
-		if (trickLength === 4 && !trickCompleteFired) {
-			// All 4 cards played — wait 1.5s then complete
-			trickCompleteFired = true;
-			trickCompleteTimer = setTimeout(async () => {
+		if (currentPhase === 'trickEnd' && currentTrickNum === 8 && !trick8Fired) {
+			trick8Fired = true;
+			trick8Timer = setTimeout(async () => {
 				if (lobbyCode) {
 					await completeTrick(lobbyCode);
 				}
-			}, 1500);
-		} else if (trickLength !== 4) {
-			// Trick cleared — reset for next trick
-			trickCompleteFired = false;
-			if (trickCompleteTimer) {
-				clearTimeout(trickCompleteTimer);
-				trickCompleteTimer = null;
+			}, 2500);
+		} else if (currentPhase !== 'trickEnd' || currentTrickNum !== 8) {
+			trick8Fired = false;
+			if (trick8Timer) {
+				clearTimeout(trick8Timer);
+				trick8Timer = null;
 			}
 		}
 	});
 
 	// Track phase to detect round end
-	let currentPhase = $derived(gameState?.phase);
 	let roundEndTimer: ReturnType<typeof setTimeout> | null = null;
 	let roundEndFired = false;
 
@@ -84,6 +88,19 @@
 		if (!lobbyCode || mySeat === undefined) return;
 		await playCard(lobbyCode, mySeat, card);
 	}
+
+	async function handleRoem() {
+		if (!lobbyCode || mySeat === undefined) return;
+		await claimRoem(lobbyCode, mySeat);
+	}
+
+	async function handleVerzaakt() {
+		if (!lobbyCode || mySeat === undefined) return;
+		await callVerzaakt(lobbyCode, mySeat);
+	}
+
+	// Notification from game state
+	let notification = $derived(gameState?.lastNotification ?? null);
 </script>
 
 {#if gameState && mySeat !== undefined}
@@ -96,6 +113,8 @@
 			{players}
 			{tableDeviceJoined}
 			onCardPlay={handleCardPlay}
+			onRoem={handleRoem}
+			onVerzaakt={handleVerzaakt}
 		/>
 		<TrumpSelector
 			isMyTurn={isMyTrumpTurn}
@@ -173,7 +192,10 @@
 			{players}
 			{tableDeviceJoined}
 			onCardPlay={handleCardPlay}
+			onRoem={handleRoem}
+			onVerzaakt={handleVerzaakt}
 		/>
+		<GameNotification {notification} />
 	{/if}
 {:else}
 	<div class="flex h-screen items-center justify-center bg-green-900">
