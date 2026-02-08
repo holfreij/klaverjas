@@ -43,6 +43,37 @@ describe('detectRoem', () => {
 			const roem = detectRoem(trick, '♣');
 			expect(roem.filter((r) => r.type === 'sequence')).toHaveLength(0);
 		});
+
+		it('should detect 3-sequence within 4 same-suit non-consecutive cards', () => {
+			// 7♠ 10♠ J♠ Q♠ — 10-J-Q is a valid 3-sequence (20 pts)
+			const trick = [card('♠', '7'), card('♠', '10'), card('♠', 'J'), card('♠', 'Q')];
+			const roem = detectRoem(trick, '♥');
+			expect(roem).toContainEqual({ type: 'sequence', points: 20, cards: expect.any(Array) });
+		});
+
+		it('should detect 3-sequence at start of 4 same-suit cards', () => {
+			// 7♠ 8♠ 9♠ Q♠ — 7-8-9 is a valid 3-sequence (20 pts)
+			const trick = [card('♠', '7'), card('♠', '8'), card('♠', '9'), card('♠', 'Q')];
+			const roem = detectRoem(trick, '♥');
+			expect(roem).toContainEqual({ type: 'sequence', points: 20, cards: expect.any(Array) });
+		});
+
+		it('should detect sequence regardless of play order', () => {
+			// 9♠ 7♠ 8♠ A♥ — 7-8-9 is a valid 3-sequence despite unsorted play order
+			const trick = [card('♠', '9'), card('♠', '7'), card('♠', '8'), card('♥', 'A')];
+			const roem = detectRoem(trick, '♥');
+			expect(roem).toContainEqual({ type: 'sequence', points: 20, cards: expect.any(Array) });
+		});
+
+		it('should return correct cards for 3-sequence in 4 same-suit', () => {
+			// 7♠ 10♠ J♠ Q♠ — only 10-J-Q should be in the cards array
+			const trick = [card('♠', '7'), card('♠', '10'), card('♠', 'J'), card('♠', 'Q')];
+			const roem = detectRoem(trick, '♥');
+			const seq = roem.find((r) => r.type === 'sequence');
+			expect(seq).toBeDefined();
+			expect(seq!.cards).toHaveLength(3);
+			expect(seq!.cards.map((c) => c.rank).sort()).toEqual(['10', 'J', 'Q'].sort());
+		});
 	});
 
 	describe('stuk (K+Q of trump)', () => {

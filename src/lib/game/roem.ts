@@ -58,19 +58,31 @@ function detectSequence(trick: Card[]): RoemItem | null {
 	for (const [, cards] of bySuit) {
 		if (cards.length < 3) continue;
 
-		// Get indices in sequence order
-		const indices = cards.map((c) => SEQUENCE_ORDER.indexOf(c.rank)).sort((a, b) => a - b);
+		// Sort cards by sequence order
+		const sorted = cards
+			.map((c) => ({ card: c, idx: SEQUENCE_ORDER.indexOf(c.rank) }))
+			.sort((a, b) => a.idx - b.idx);
+		const indices = sorted.map((s) => s.idx);
+		const sortedCards = sorted.map((s) => s.card);
 
 		// Check for 4-sequence
-		if (cards.length === 4) {
+		if (sortedCards.length === 4) {
 			if (isConsecutive(indices)) {
-				return { type: 'sequence', points: 50, cards: [...cards] };
+				return { type: 'sequence', points: 50, cards: [...sortedCards] };
+			}
+			// Check 3-card subsets for a 3-sequence
+			for (let i = 0; i < indices.length; i++) {
+				const subset = indices.filter((_, j) => j !== i);
+				if (isConsecutive(subset)) {
+					const subsetCards = sortedCards.filter((_, j) => j !== i);
+					return { type: 'sequence', points: 20, cards: subsetCards };
+				}
 			}
 		}
 
-		// Check for 3-sequence (only if exactly 3 cards of same suit, or 4 cards but not consecutive)
-		if (cards.length === 3 && isConsecutive(indices)) {
-			return { type: 'sequence', points: 20, cards: [...cards] };
+		// Check for 3-sequence
+		if (sortedCards.length === 3 && isConsecutive(indices)) {
+			return { type: 'sequence', points: 20, cards: [...sortedCards] };
 		}
 	}
 
