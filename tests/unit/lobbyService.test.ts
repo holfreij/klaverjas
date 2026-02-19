@@ -19,7 +19,8 @@ vi.mock('firebase/database', () => ({
 }));
 
 vi.mock('$lib/multiplayer/firebase', () => ({
-	getFirebaseDatabase: vi.fn(() => 'mockDb')
+	getFirebaseDatabase: vi.fn(() => 'mockDb'),
+	ensureAuth: vi.fn(() => Promise.resolve('mock-auth-uid'))
 }));
 
 // Mock localStorage

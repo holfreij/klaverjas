@@ -1,5 +1,6 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import { getDatabase, type Database } from 'firebase/database';
+import { getAuth, signInAnonymously, type Auth } from 'firebase/auth';
 
 const firebaseConfig = {
 	apiKey: 'AIzaSyCgzsHqI0xzlqGl6zIoU6Wso83SeYW5nvs',
@@ -13,6 +14,7 @@ const firebaseConfig = {
 
 let app: FirebaseApp;
 let database: Database;
+let auth: Auth;
 
 export function getFirebaseApp(): FirebaseApp {
 	if (!app) {
@@ -27,4 +29,24 @@ export function getFirebaseDatabase(): Database {
 		database = getDatabase(getFirebaseApp());
 	}
 	return database;
+}
+
+export function getFirebaseAuth(): Auth {
+	if (!auth) {
+		auth = getAuth(getFirebaseApp());
+	}
+	return auth;
+}
+
+/**
+ * Signs in anonymously (idempotent — returns existing UID if already signed in).
+ * Returns the Firebase UID which becomes the player ID.
+ */
+export async function ensureAuth(): Promise<string> {
+	const firebaseAuth = getFirebaseAuth();
+	if (firebaseAuth.currentUser) {
+		return firebaseAuth.currentUser.uid;
+	}
+	const credential = await signInAnonymously(firebaseAuth);
+	return credential.user.uid;
 }

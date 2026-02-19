@@ -1,6 +1,27 @@
-import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
 import { ref, get, remove } from 'firebase/database';
-import { getFirebaseDatabase } from '$lib/multiplayer/firebase';
+import { signInAnonymously } from 'firebase/auth';
+import type { Lobby, PlayerSeat } from '$lib/multiplayer/types';
+import type { Card } from '$lib/game/deck';
+import { getLegalMoves } from '$lib/game/rules';
+
+// Counter for unique player IDs per ensureAuth() call (see lobby.test.ts for explanation).
+let _ensureAuthCounter = 0;
+let _realAuthUid = '';
+
+vi.mock('$lib/multiplayer/firebase', async (importOriginal) => {
+	const mod = (await importOriginal()) as Record<string, unknown>;
+	return {
+		...mod,
+		ensureAuth: vi.fn(async () => {
+			_ensureAuthCounter++;
+			if (_ensureAuthCounter === 1) return _realAuthUid;
+			return `test_player_${_ensureAuthCounter}`;
+		})
+	};
+});
+
+import { getFirebaseDatabase, getFirebaseAuth } from '$lib/multiplayer/firebase';
 import { createLobby, joinLobby, startGame, clearSession } from '$lib/multiplayer/lobbyService';
 import {
 	initializeGame,
@@ -11,9 +32,6 @@ import {
 	claimRoem,
 	callVerzaakt
 } from '$lib/multiplayer/gameService';
-import type { Lobby, PlayerSeat } from '$lib/multiplayer/types';
-import type { Card } from '$lib/game/deck';
-import { getLegalMoves } from '$lib/game/rules';
 
 // Track created lobbies for cleanup
 const createdLobbies: string[] = [];
@@ -72,7 +90,14 @@ async function createFullLobby(): Promise<{ code: string; hostId: string; player
 
 describe('Firebase Game Service Integration Tests', { timeout: 10000 }, () => {
 	beforeAll(async () => {
+		// Sign in anonymously — required by Firebase security rules
+		const cred = await signInAnonymously(getFirebaseAuth());
+		_realAuthUid = cred.user.uid;
 		clearSession();
+	});
+
+	beforeEach(() => {
+		_ensureAuthCounter = 0;
 	});
 
 	afterEach(async () => {

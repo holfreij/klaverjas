@@ -10,7 +10,7 @@ import {
 	type DatabaseReference,
 	type Unsubscribe
 } from 'firebase/database';
-import { getFirebaseDatabase } from './firebase';
+import { getFirebaseDatabase, ensureAuth } from './firebase';
 import { generateLobbyCode, validatePlayerName, getNewHost } from './lobby';
 import { initializeGame } from './gameService';
 import type { Lobby, Player, Seat, PlayerSeat, SessionData } from './types';
@@ -33,10 +33,6 @@ export interface JoinLobbyResult {
 export interface LobbyError {
 	code: 'not_found' | 'name_taken' | 'lobby_full' | 'invalid_name' | 'firebase_error';
 	message: string;
-}
-
-function generatePlayerId(): string {
-	return `p_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
 function getLobbyRef(code: string): DatabaseReference {
@@ -86,7 +82,7 @@ export async function createLobby(playerName: string): Promise<CreateLobbyResult
 	}
 
 	const code = generateLobbyCode();
-	const playerId = generatePlayerId();
+	const playerId = await ensureAuth();
 	const now = Date.now();
 
 	const lobby: Lobby = {
@@ -186,7 +182,7 @@ export async function joinLobby(
 			}
 		}
 
-		const playerId = generatePlayerId();
+		const playerId = await ensureAuth();
 		const now = Date.now();
 
 		const player: Player = {
@@ -228,26 +224,23 @@ export async function leaveLobby(lobbyCode: string, playerId: string): Promise<v
 		}
 
 		const lobby = snapshot.val() as Lobby;
+		const playerCount = Object.keys(lobby.players || {}).length;
 
-		// If this player is the host, transfer host role
-		if (lobby.host === playerId) {
-			const newHostId = getNewHost(lobby.players || {}, playerId);
-			if (newHostId) {
-				await update(lobbyRef, { host: newHostId });
+		if (playerCount <= 1) {
+			// Last player — delete the whole lobby atomically
+			// (must do this before removing self, otherwise auth.uid is no longer a member)
+			await remove(lobbyRef);
+		} else {
+			// Multiple players: transfer host if needed, then remove self
+			if (lobby.host === playerId) {
+				const newHostId = getNewHost(lobby.players || {}, playerId);
+				if (newHostId) {
+					await update(lobbyRef, { host: newHostId });
+				}
 			}
-		}
 
-		// Remove player
-		const playerRef = ref(getFirebaseDatabase(), `lobbies/${lobbyCode}/players/${playerId}`);
-		await remove(playerRef);
-
-		// If no players left, delete the lobby
-		const updatedSnapshot = await get(lobbyRef);
-		if (updatedSnapshot.exists()) {
-			const updatedLobby = updatedSnapshot.val() as Lobby;
-			if (!updatedLobby.players || Object.keys(updatedLobby.players).length === 0) {
-				await remove(lobbyRef);
-			}
+			const playerRef = ref(getFirebaseDatabase(), `lobbies/${lobbyCode}/players/${playerId}`);
+			await remove(playerRef);
 		}
 
 		clearSession();

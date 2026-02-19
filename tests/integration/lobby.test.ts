@@ -1,6 +1,28 @@
-import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
 import { ref, get, remove } from 'firebase/database';
-import { getFirebaseDatabase } from '$lib/multiplayer/firebase';
+import { signInAnonymously } from 'firebase/auth';
+import type { Lobby } from '$lib/multiplayer/types';
+
+// Counter for unique player IDs per ensureAuth() call.
+// In production, each browser has its own auth.uid. In tests, all calls share one auth session,
+// so we mock ensureAuth to return unique IDs. The first call per test returns the real auth.uid
+// (so the lobby creator satisfies the security rule for subsequent member writes).
+let _ensureAuthCounter = 0;
+let _realAuthUid = '';
+
+vi.mock('$lib/multiplayer/firebase', async (importOriginal) => {
+	const mod = (await importOriginal()) as Record<string, unknown>;
+	return {
+		...mod,
+		ensureAuth: vi.fn(async () => {
+			_ensureAuthCounter++;
+			if (_ensureAuthCounter === 1) return _realAuthUid;
+			return `test_player_${_ensureAuthCounter}`;
+		})
+	};
+});
+
+import { getFirebaseDatabase, getFirebaseAuth } from '$lib/multiplayer/firebase';
 import {
 	createLobby,
 	joinLobby,
@@ -14,7 +36,6 @@ import {
 	subscribeLobby,
 	updatePlayerStatus
 } from '$lib/multiplayer/lobbyService';
-import type { Lobby } from '$lib/multiplayer/types';
 
 // Track created lobbies for cleanup
 const createdLobbies: string[] = [];
@@ -50,10 +71,17 @@ async function cleanupLobby(code: string) {
 
 describe('Firebase Lobby Integration Tests', () => {
 	beforeAll(async () => {
+		// Sign in anonymously — required by Firebase security rules
+		const cred = await signInAnonymously(getFirebaseAuth());
+		_realAuthUid = cred.user.uid;
 		// Clear any existing session
 		clearSession();
 		// Clean up test lobby code that might exist from previous runs
 		await cleanupLobby('999999');
+	});
+
+	beforeEach(() => {
+		_ensureAuthCounter = 0;
 	});
 
 	afterEach(async () => {
