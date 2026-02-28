@@ -28,12 +28,16 @@ try {
 	process.exit(1);
 }
 
-if (!result || result.trim() === 'null') {
+// Strip non-JSON lines (e.g. firebase-tools deprecation warnings) from output
+const jsonStart = result.indexOf('{');
+const cleanResult = jsonStart !== -1 ? result.slice(jsonStart) : result.trim();
+
+if (!cleanResult || cleanResult === 'null') {
 	console.log('No lobbies found, nothing to clean up.');
 	process.exit(0);
 }
 
-const lobbies = JSON.parse(result);
+const lobbies = JSON.parse(cleanResult);
 const codes = Object.keys(lobbies);
 let deleted = 0;
 
