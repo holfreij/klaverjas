@@ -1,15 +1,24 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import { getDatabase, type Database } from 'firebase/database';
 import { getAuth, signInAnonymously, type Auth } from 'firebase/auth';
+import {
+	PUBLIC_FIREBASE_API_KEY,
+	PUBLIC_FIREBASE_AUTH_DOMAIN,
+	PUBLIC_FIREBASE_DATABASE_URL,
+	PUBLIC_FIREBASE_PROJECT_ID,
+	PUBLIC_FIREBASE_STORAGE_BUCKET,
+	PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+	PUBLIC_FIREBASE_APP_ID
+} from '$env/static/public';
 
 const firebaseConfig = {
-	apiKey: 'AIzaSyCgzsHqI0xzlqGl6zIoU6Wso83SeYW5nvs',
-	authDomain: 'klaverjas-web.firebaseapp.com',
-	databaseURL: 'https://klaverjas-web-default-rtdb.europe-west1.firebasedatabase.app',
-	projectId: 'klaverjas-web',
-	storageBucket: 'klaverjas-web.firebasestorage.app',
-	messagingSenderId: '382997326438',
-	appId: '1:382997326438:web:0a3aef1d96ca4ddc081ba7'
+	apiKey: PUBLIC_FIREBASE_API_KEY,
+	authDomain: PUBLIC_FIREBASE_AUTH_DOMAIN,
+	databaseURL: PUBLIC_FIREBASE_DATABASE_URL,
+	projectId: PUBLIC_FIREBASE_PROJECT_ID,
+	storageBucket: PUBLIC_FIREBASE_STORAGE_BUCKET,
+	messagingSenderId: PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+	appId: PUBLIC_FIREBASE_APP_ID
 };
 
 let app: FirebaseApp;

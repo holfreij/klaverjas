@@ -4,9 +4,11 @@ import path from 'path';
 
 export default defineConfig({
 	plugins: [svelte({ hot: false })],
+	envPrefix: ['VITE_', 'PUBLIC_'],
 	resolve: {
 		alias: {
-			$lib: path.resolve('./src/lib')
+			$lib: path.resolve('./src/lib'),
+			'$env/static/public': path.resolve('./tests/mocks/env-static-public.ts')
 		},
 		conditions: ['browser']
 	},
